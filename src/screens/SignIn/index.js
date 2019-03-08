@@ -1,31 +1,28 @@
 import * as React from "react";
 import { Row, Col, Form, Input, Icon, Checkbox, Button } from "antd";
-import { Link, withRouter } from "react-router-dom";
-import { compose } from 'recompose';
-import { withFirebase } from '../Firebase';
 import "./index.css";
 
 class LoginPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { email: "", password: "" };
+    this.state = { email: "", password: "", confirmPassword: "" };
   }
 
   handleSubmit = e => {
     e.preventDefault();
-    this.props.form.validateFields(async (error, _values) => {
+    this.props.form.validateFields((error, _values) => {
       if (!error) {
-        const user = await this.props.firebase.doSignInWithEmailAndPassword(
-          this.state.email,
-          this.state.password
-        );
-        console.log(user);
+        this.props.login({
+          email: this.props.email,
+          password: this.props.password
+        });
       }
     });
   };
 
   render() {
     const { getFieldDecorator } = this.props.form;
+
     return (
       <div className="login-page">
         <Row>
@@ -34,7 +31,7 @@ class LoginPage extends React.Component {
             <div className="login-form">
               <Form onSubmit={this.handleSubmit}>
                 <Form.Item>
-                  <h2>Log In</h2>
+                  <h2>Register</h2>
                 </Form.Item>
 
                 <Form.Item>
@@ -88,13 +85,34 @@ class LoginPage extends React.Component {
                     />
                   )}
                 </Form.Item>
+                <Form.Item>
+                  {getFieldDecorator("confirmPassword", {
+                    rules: [
+                      {
+                        required: true,
+                        message: "Please Input Your Confirm Password"
+                      }
+                    ],
+                    validateTrigger: "onBlur",
+                    validateFirst: true
+                  })(
+                    <Input
+                      prefix={<Icon type="lock" />}
+                      type="confirmPassword"
+                      placeholder="Confirm Password"
+                      onChange={e =>
+                        this.setState({ confirmPassword: e.target.value })
+                      }
+                    />
+                  )}
+                </Form.Item>
 
                 <Form.Item>
-                  {getFieldDecorator("rememberMe", {
+                  {getFieldDecorator("agreement", {
                     valuePropName: "checked"
                   })(
-                    <Checkbox className="login-form-checkbox">
-                      Remember Me !
+                    <Checkbox>
+                      I have read the <a href="">agreement</a>
                     </Checkbox>
                   )}
                 </Form.Item>
@@ -119,7 +137,4 @@ class LoginPage extends React.Component {
   }
 }
 
-export default compose(
-  withRouter,
-  withFirebase
-)(Form.create()(LoginPage));
+export default Form.create()(LoginPage);
