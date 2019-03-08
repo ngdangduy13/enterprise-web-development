@@ -1,5 +1,15 @@
 {
-    "plugins": [
-      ["import", { "libraryName": "antd", "libraryDirectory": "es", "style": "css" }] // `style: true` for less
-    ]
-  }
+  "presets": [
+      "next/babel"
+  ],
+  "plugins": [
+      [
+          "import",
+          {
+              "libraryName": "antd",
+              "libraryDirectory":"lib",
+              "style": true
+          }
+      ]
+  ]
+}
