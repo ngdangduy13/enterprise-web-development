@@ -1,10 +1,25 @@
 import { createModel } from "@rematch/core";
 import { message } from 'antd';
 import firebase from '../../firebase';
+import Router from 'next/router';
 
+
+const initialState = {
+    email: '',
+    uid: '',
+    fullname: '',
+    role: '',
+
+    isBusy: false
+}
 
 const profileModel = createModel({
     state: {
+        email: '',
+        uid: '',
+        fullname: '',
+        role: '',
+
         isBusy: false
     },
     reducers: {
@@ -12,6 +27,11 @@ const profileModel = createModel({
             return {
                 ...state,
                 ...payload
+            }
+        },
+        logout: (state, payload) => {
+            return {
+                ...initialState,
             }
         },
         updateBusyState: (state, payload) => {
@@ -27,12 +47,33 @@ const profileModel = createModel({
         async loginFirebase(payload, rootState) {
             try {
                 this.updateBusyState(true);
-                const user = await firebase.auth().signInWithEmailAndPassword(
+                const resultLogin = await firebase.auth().signInWithEmailAndPassword(
                     payload.email,
                     payload.password
                 );
-                console.log(user)
+                const userRef = await firebase.firestore().collection('users').doc(resultLogin.user.uid).get();
+                const user = {
+                    email: resultLogin.user.email,
+                    uid: resultLogin.user.uid,
+                    fullname: userRef.data().fullname,
+                    role: userRef.data().role
+                }
+                this.loginSuccessfully(user)
+                Router.push('/admin')
+                message.success('Login successfully');
 
+            } catch (er) {
+                message.error(er.message);
+            } finally {
+                this.updateBusyState(false);
+            }
+        },
+        async logoutFirebase(payload, rootState) {
+            try {
+                this.updateBusyState(true);
+                const result = await firebase.auth().signOut();
+                console.log(result);
+                this.logout();
             } catch (er) {
                 message.error(er.message);
             } finally {

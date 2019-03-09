@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Row, Col, Form, Input, Icon, Checkbox, Button } from "antd";
-import firebase from '../firebase';
 import { connect } from 'react-redux'
+import '../static/css/signin.css';
 
 
 class LoginPage extends React.Component {
@@ -27,8 +27,8 @@ class LoginPage extends React.Component {
     return (
       <div className="login-page">
         <Row>
-          <Col xs={0} sm={4} lg={8} />
-          <Col xs={24} sm={16} lg={8}>
+          <Col xs={2} sm={4} lg={8} />
+          <Col xs={20} sm={16} lg={8}>
             <div className="login-form">
               <Form onSubmit={this.handleSubmit}>
                 <Form.Item>
@@ -110,7 +110,7 @@ class LoginPage extends React.Component {
               </Form>
             </div>
           </Col>
-          <Col xs={0} sm={4} lg={8} />
+          <Col xs={2} sm={4} lg={8} />
         </Row>
       </div>
     );
@@ -122,7 +122,7 @@ const mapState = state => ({
 })
 
 const mapDispatch = ({ userProfile }) => ({
-  loginFirebase: (email, password) => userProfile.loginFirebase({email, password}),
+  loginFirebase: (email, password) => userProfile.loginFirebase({ email, password }),
 })
 
 export default connect(mapState, mapDispatch)(Form.create()(LoginPage));

@@ -1,0 +1,9 @@
+.sidebar-menu {
+  background-color: #002140;
+  position: 'fixed';
+}
+
+.sidebar-menu .submenu {
+  text-align: left;
+  font-weight: 450;
+}

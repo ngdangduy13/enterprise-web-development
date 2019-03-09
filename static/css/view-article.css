@@ -1,0 +1,14 @@
+.container {
+    background-color: white;
+    min-height: 90vh;
+    padding: 2% 3%
+}
+
+.add, .refresh {
+    padding: 12px 0;
+    margin-right: 10px;
+}
+
+.button-flex {
+    display: flex;
+}

@@ -1,20 +1,13 @@
 
 // use "next-antd-aza-less" in .next.config.js
 
-const antdLessLoader = require("next-antd-aza-less")
+const withCSS = require('@zeit/next-css')
+
+
 
 if (typeof require !== 'undefined') {
-    require.extensions['.less'] = (file) => { }
+    require.extensions['.css'] = (file) => { }
 }
 
 /* Without CSS Modules, with PostCSS */
-module.exports = antdLessLoader({
-    cssModules: true,
-    cssLoaderOptions: {
-        importLoaders: 1,
-        localIdentName: "[local]___[hash:base64:5]",
-    },
-    lessLoaderOptions: {
-        javascriptEnabled: true,
-    }
-});
+module.exports = withCSS();
