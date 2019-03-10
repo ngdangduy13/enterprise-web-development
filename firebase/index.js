@@ -9,7 +9,7 @@ const config = {
     authDomain: "testweb-3595a.firebaseapp.com",
     databaseURL: "https://testweb-3595a.firebaseio.com",
     projectId: "testweb-3595a",
-    storageBucket: "",
+    storageBucket: "testweb-3595a.appspot.com",
     messagingSenderId: "331534249876"
 };
 if (!app.apps.length) {

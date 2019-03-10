@@ -2,6 +2,8 @@ const express = require('express')
 const next = require('next')
 const morgan = require('morgan')
 const { authorize } = require('./middlewares/authorize')
+const admin = require('../firebase/admin');
+
 
 const setupNextjsRoutes = (server, app) => {
     const handle = app.getRequestHandler();
@@ -27,7 +29,15 @@ const setupPublicRoutes = (server, app) => {
     });
 
     server.get('/admin/view-article', authorize(), async (req, res) => {
-        app.render(req, res, '/article/view-article', req.query);
+        const querySnapshot = await admin.firestore().collection('articles').where("studentId", "==", req.query.profile.uid).get();
+        const articles = []
+        querySnapshot.forEach(doc => {
+            articles.push({ ...doc.data(), id: doc.id })
+        })
+        app.render(req, res, '/article/view-article', {
+            articles,
+            ...req.query
+        });
     });
 
     server.get('/login', async (req, res) => {

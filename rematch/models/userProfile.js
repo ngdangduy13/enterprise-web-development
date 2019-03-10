@@ -3,6 +3,7 @@ import { message } from 'antd';
 import firebase from '../../firebase';
 import Router from 'next/router';
 import 'isomorphic-unfetch';
+import * as qs from 'qs';
 
 
 const initialState = {
@@ -45,6 +46,24 @@ const profileModel = createModel({
     effects: (dispatch) => ({
         // handle state changes with impure functions.
         // use async/await for async actions
+
+        async findUser(payload, rootState) {
+            try {
+                this.updateBusyState(true);
+                const userRef = await firebase.firestore().collection('users').doc(payload).get();
+                const user = {
+                    email: userRef.data().email,
+                    fullname: userRef.data().fullname,
+                    role: userRef.data().role
+                }
+                this.loginSuccessfully(user)
+            } catch (er) {
+                message.error(er.message);
+            } finally {
+                this.updateBusyState(false);
+            }
+
+        },
         async loginFirebase(payload, rootState) {
             try {
                 this.updateBusyState(true);
@@ -54,7 +73,7 @@ const profileModel = createModel({
                 );
                 const userRef = await firebase.firestore().collection('users').doc(resultLogin.user.uid).get();
                 const user = {
-                    email: resultLogin.user.email,
+                    email: userRef.data().fullname,
                     uid: resultLogin.user.uid,
                     fullname: userRef.data().fullname,
                     role: userRef.data().role
@@ -68,7 +87,13 @@ const profileModel = createModel({
                     body: JSON.stringify({ idToken })
                 })
                 this.loginSuccessfully(user)
-                Router.push('/admin')
+                const callbackUrl = qs.parse(window.location.search, { ignoreQueryPrefix: true })
+                    .callbackUrl;
+                if (callbackUrl) {
+                    Router.push(callbackUrl);
+                } else {
+                    Router.push('/admin')
+                }
                 message.success('Login successfully');
             } catch (er) {
                 message.error(er.message);
@@ -80,7 +105,6 @@ const profileModel = createModel({
             try {
                 this.updateBusyState(true);
                 const result = await firebase.auth().signOut();
-                console.log(result);
                 this.logout();
             } catch (er) {
                 message.error(er.message);

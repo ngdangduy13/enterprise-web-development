@@ -1,10 +1,4 @@
-const admin = require('firebase-admin');
-const serviceAccount = require('../../firebase/serviceAccountKey.json');
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://testweb-3595a.firebaseio.com/'
-});
+const admin = require('../../firebase/admin');
 
 
 const authorize = () => {
@@ -12,7 +6,6 @@ const authorize = () => {
     const loginUrl = `${req.protocol}://${req.get('host')}/login?callbackUrl=${req.url}`;
 
     let token = req.cookies.token;
-    console.log(token)
     if (!token) {
       res.redirect(loginUrl);
     }
@@ -20,7 +13,6 @@ const authorize = () => {
       let tokenData;
       try {
         tokenData = await admin.auth().verifyIdToken(token)
-        console.log('tokenData', tokenData)
       }
       catch (error) {
         console.log(error)
@@ -29,9 +21,17 @@ const authorize = () => {
       if (tokenData && tokenData.exp && tokenData.exp < Math.round(new Date().getTime() / 1000)) {
         res.redirect(loginUrl);
       }
+      const userRef = await admin.firestore().collection('users').doc(tokenData.uid).get();
+
+      const user = {
+        email: userRef.data().email,
+        fullname: userRef.data().fullname,
+        role: userRef.data().role,
+        uid: tokenData.uid
+      }
       // Refresh Token
       req.query.profile = {
-        ...tokenData,
+        ...user,
         token: token,
       };
       // // Verify Permissions

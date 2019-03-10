@@ -1,6 +1,6 @@
 import * as React from "react";
 import AdminLayout from "../../components/AdminLayout";
-import { Row, Col, Input, Upload, Button, Icon, Tooltip, Table, Modal, Form, Tree, Checkbox } from 'antd';
+import { Row, Col, Input, Upload, Button, Icon, Tooltip, Table, Modal, Form, Tag } from 'antd';
 import '../../static/css/view-article.css';
 import withRematch from '../../rematch/withRematch'
 import initStore from '../../rematch/store'
@@ -9,14 +9,14 @@ import initStore from '../../rematch/store'
 
 class UploadArticle extends React.Component {
     static getInitialProps({ store, isServer, pathname, query }) {
-        const t = store.getState(); // component will be able to read from store's state when rendered
-        console.log(t)
+        // const userProfile = store.getState().userProfile; // component will be able to read from store's state when rendered
+        store.dispatch.article.fetchArticleSuccessfully(query.articles);
     }
 
     constructor(props) {
         super(props);
         this.state = {
-            isVisible: true,
+            isVisible: false,
             fileList: [],
             title: '',
             description: ''
@@ -52,6 +52,32 @@ class UploadArticle extends React.Component {
         return Object.keys(fieldsError).some(field => fieldsError[field]);
     }
 
+    actionButtons = (record, index) => {
+        return (
+            <div className="action-buttons">
+                <Tooltip title='Edit Article'>
+                    <Button
+                        type="primary"
+                        icon="edit"
+                        className="button"
+                        // onClick={(_event) => this.props.openAddUserModal({ currentUser: record })}
+                        style={{ marginRight: '12px' }}
+                    />
+                </Tooltip>
+
+                <Tooltip title={'Delete Article'}>
+                    <Button
+                        type="primary"
+                        icon={'delete'}
+                        className="button"
+                        // onClick={() => record.isActive ? this.props.deactivateUser({ userId: record._id }) : this.props.activateUser({ userId: record._id })}
+                        style={{ marginRight: '12px' }}
+                    />
+                </Tooltip>
+            </div>
+        );
+    };
+
     render() {
         const { getFieldDecorator, getFieldsError } = this.props.form;
         const { fileList } = this.state;
@@ -68,7 +94,7 @@ class UploadArticle extends React.Component {
             },
             beforeUpload: (file) => {
                 this.setState(state => ({
-                    fileList: [...state.fileList, file],
+                    fileList: [file],
                 }));
                 return false;
             },
@@ -78,26 +104,44 @@ class UploadArticle extends React.Component {
         const columns = [
             {
                 title: 'Title',
-                dataIndex: 'email',
-                key: 'email',
+                dataIndex: 'title',
+                key: 'title',
                 sorter: true,
-            },
-            {
-                title: 'Description',
-                dataIndex: 'fullName',
-                key: 'fullName',
             },
             {
                 title: 'Uploaded Date',
-                dataIndex: 'date',
-                key: 'date',
-                sorter: true,
+                dataIndex: 'timestamp',
+                key: 'timestamp',
+                width: '20%',
+                // sorter: true,
+            },
+            {
+                title: 'Description',
+                dataIndex: 'description',
+                key: 'description',
+            },
+            {
+                title: 'Status',
+                dataIndex: 'isPublish',
+                key: 'isPublish',
+                width: '12%',
+                render: (isPublish, index) => (
+                    <span>
+                        <Tag color={isPublish ? '#2db7f5' : 'orange'} key={index}>{isPublish ? 'Published' : 'Unpublish'}</Tag>
+                    </span>
+                )
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                width: '12%',
+                render: this.actionButtons
             },
         ];
         return (
             <AdminLayout userEmail={this.props.userProfile.email} logOut={this.props.logoutFirebase}>
                 <div className="container">
-                    <Row type="flex" gutter={24}>
+                    {/* <Row type="flex" gutter={24}>
                         <Col lg={12} md={24} xs={24}>
                             <div className="search">
                                 <Input.Search
@@ -112,7 +156,7 @@ class UploadArticle extends React.Component {
 
                         <Col lg={12} md={24} xs={24}>
                         </Col>
-                    </Row>
+                    </Row> */}
                     <Row>
                         <Col span={24} className='button-flex'>
                             <div className="add">
@@ -121,8 +165,8 @@ class UploadArticle extends React.Component {
                                 </Button>
                             </div>
                             <div className="refresh">
-                                <Button type="primary">
-                                    <Icon type="sync" /> Refresh
+                                <Button type="primary" onClick={this.props.fetchArticles} loading={this.props.article.isBusy} icon="sync">
+                                    Refresh
                                 </Button>
                             </div>
                         </Col>
@@ -130,10 +174,18 @@ class UploadArticle extends React.Component {
                     <div className="users-table">
                         <Table
                             size="middle"
-                            loading={this.props.isBusy}
+                            loading={this.props.article.isBusy}
                             columns={columns}
-                            dataSource={this.props.data}
+                            dataSource={this.props.article.all}
                             rowKey={record => record._id}
+                            // onRow={(record, rowIndex) => {
+                            //     // console.log(record, rowIndex)
+                            //     return {
+                            //         onClick: (event) => { console.log(event, record) },       // click row
+                            //         onDoubleClick: (event) => { }, // double click row
+                            //         onContextMenu: (event) => { }  // right button click row
+                            //     };
+                            // }}
                         // onChange={(pagination, _filters, sorter) => {
                         //     this.props.fetchDataReducer({
                         //         search: this.props.search,
@@ -205,7 +257,7 @@ class UploadArticle extends React.Component {
                                     )}
                                 </Form.Item>
                                 <Form.Item
-                                    label="Dragger"
+                                    label="Article"
                                 >
                                     <div className="dropbox">
                                         {getFieldDecorator('dragger', {
@@ -217,7 +269,7 @@ class UploadArticle extends React.Component {
                                                 <p className="ant-upload-drag-icon">
                                                     <Icon type="inbox" />
                                                 </p>
-                                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                                                <p className="ant-upload-text">Click or drag file to this area to choose file to upload</p>
                                                 <p className="ant-upload-hint">Only support Word documents.</p>
                                             </Upload.Dragger>
                                         )}
@@ -239,10 +291,11 @@ const mapState = state => ({
 
 })
 
-const mapDispatch = ({ userProfile }) => ({
+const mapDispatch = ({ userProfile, article }) => ({
     loginFirebase: (email, password) => userProfile.loginFirebase({ email, password }),
     logoutFirebase: () => userProfile.logoutFirebase(),
-
+    fetchArticles: () => article.fetchArticles(),
+    uploadArticle: (title, description, file) => article.uploadArticle({ title, description, file }),
 })
 
 

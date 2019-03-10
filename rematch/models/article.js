@@ -2,6 +2,7 @@ import { createModel } from "@rematch/core";
 import { message } from 'antd';
 import firebase from '../../firebase';
 import Router from 'next/router';
+import moment from 'moment';
 
 
 const initialState = {
@@ -26,7 +27,7 @@ const article = createModel({
         fetchArticleSuccessfully: (state, payload) => {
             return {
                 ...state,
-                ...payload
+                all: payload
             }
         },
     },
@@ -39,10 +40,11 @@ const article = createModel({
                 const docRef = await firebase.firestore().collection('articles').add({
                     title: payload.title,
                     description: payload.description,
-                    timestamp: new Date(),
+                    timestamp: moment().format('LL'),
                     studentId: rootState.userProfile.uid,
                     isPublish: false
                 });
+                console.log(rootState)
                 const storageRef = await firebase.storage().ref().child(`${docRef.id}.docx`).put(payload.file)
                 message.success('Upload successfully');
             } catch (er) {
@@ -56,13 +58,13 @@ const article = createModel({
             try {
                 this.updateBusyState(true);
                 const querySnapshot = await firebase.firestore().collection('articles').where("studentId", "==", rootState.userProfile.uid).get();
-                console.log(rootState)
-                const result = []
+                const articles = []
                 querySnapshot.forEach(doc => {
-                    result.push(doc.data())
+                    articles.push({ ...doc.data(), id: doc.id })
                 })
-                console.log(result)
-                this.fetchArticleSuccessfully(result)
+                message.success('Fetching articles successfully');
+
+                this.fetchArticleSuccessfully(articles)
             } catch (er) {
                 console.log(er)
                 message.error(er.message);
