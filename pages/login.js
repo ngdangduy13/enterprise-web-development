@@ -2,6 +2,8 @@ import * as React from "react";
 import { Row, Col, Form, Input, Icon, Checkbox, Button } from "antd";
 import { connect } from 'react-redux'
 import '../static/css/signin.css';
+import withRematch from '../rematch/withRematch'
+import initStore from '../rematch/store'
 
 
 class LoginPage extends React.Component {
@@ -125,5 +127,5 @@ const mapDispatch = ({ userProfile }) => ({
   loginFirebase: (email, password) => userProfile.loginFirebase({ email, password }),
 })
 
-export default connect(mapState, mapDispatch)(Form.create()(LoginPage));
+export default withRematch(initStore, mapState, mapDispatch)(Form.create()(LoginPage));
 

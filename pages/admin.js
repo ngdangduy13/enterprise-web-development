@@ -1,12 +1,11 @@
 import * as React from "react";
-import { connect } from 'react-redux'
 import AdminLayout from "../components/AdminLayout";
+import withRematch from '../rematch/withRematch'
+import initStore from '../rematch/store'
 
 
 class LoginPage extends React.Component {
   static getInitialProps({ store, isServer, pathname, query }) {
-    const t = store.getState(); // component will be able to read from store's state when rendered
-    console.log(t)
   }
 
   constructor(props) {
@@ -31,5 +30,5 @@ const mapDispatch = ({ userProfile }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
 })
 
-export default connect(state => state)(LoginPage);
+export default withRematch(initStore, mapState, mapDispatch)(LoginPage);
 

@@ -5,12 +5,12 @@ import 'firebase/storage';
 
 
 const config = {
-    apiKey: "AIzaSyA-4zvmziXMfjyXUKNI7hN6nl4aoezt2wE",
-    authDomain: "test-5b256.firebaseapp.com",
-    databaseURL: "https://test-5b256.firebaseio.com",
-    projectId: "test-5b256",
-    storageBucket: "test-5b256.appspot.com",
-    messagingSenderId: "833147250747"
+    apiKey: "AIzaSyAiabLtMwcG3f_qM8uwD9mmhjXpKJaaUWA",
+    authDomain: "testweb-3595a.firebaseapp.com",
+    databaseURL: "https://testweb-3595a.firebaseio.com",
+    projectId: "testweb-3595a",
+    storageBucket: "",
+    messagingSenderId: "331534249876"
 };
 if (!app.apps.length) {
     app.initializeApp(config);

@@ -3,11 +3,14 @@ import userProfile from './models/userProfile';
 import article from './models/article';
 
 
-export const initStore = () => {
+export const initStore = (initialState) => {
     return init({
         models: {
             userProfile,
             article
+        },
+        redux: {
+            initialState
         }
     });
 };

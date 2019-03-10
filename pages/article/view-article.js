@@ -2,7 +2,8 @@ import * as React from "react";
 import AdminLayout from "../../components/AdminLayout";
 import { Row, Col, Input, Upload, Button, Icon, Tooltip, Table, Modal, Form, Tree, Checkbox } from 'antd';
 import '../../static/css/view-article.css';
-import { connect } from 'react-redux'
+import withRematch from '../../rematch/withRematch'
+import initStore from '../../rematch/store'
 
 
 
@@ -54,7 +55,6 @@ class UploadArticle extends React.Component {
     render() {
         const { getFieldDecorator, getFieldsError } = this.props.form;
         const { fileList } = this.state;
-
         const propsUpload = {
             onRemove: (file) => {
                 this.setState((state) => {
@@ -233,20 +233,18 @@ class UploadArticle extends React.Component {
     }
 }
 
-const mapState = (rootState) => {
-    return {
-        article: rootState.article,
-        userProfile: rootState.userProfile
-    };
-};
+const mapState = state => ({
+    userProfile: state.userProfile,
+    article: state.article,
 
-const mapDispatch = (rootReducer) => {
-    return {
-        articleReducer: rootReducer.article,
-        userProfileReducer: rootReducer.userProfile,
-    };
-};
+})
+
+const mapDispatch = ({ userProfile }) => ({
+    loginFirebase: (email, password) => userProfile.loginFirebase({ email, password }),
+    logoutFirebase: () => userProfile.logoutFirebase(),
+
+})
 
 
-export default connect(state => state)(Form.create()(UploadArticle));
+export default withRematch(initStore, mapState, mapDispatch)(Form.create()(UploadArticle));
 

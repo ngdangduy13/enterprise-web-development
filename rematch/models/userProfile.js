@@ -2,6 +2,7 @@ import { createModel } from "@rematch/core";
 import { message } from 'antd';
 import firebase from '../../firebase';
 import Router from 'next/router';
+import 'isomorphic-unfetch';
 
 
 const initialState = {
@@ -58,10 +59,17 @@ const profileModel = createModel({
                     fullname: userRef.data().fullname,
                     role: userRef.data().role
                 }
+                const idToken = await firebase.auth().currentUser.getIdToken();
+                fetch('/api/login', {
+                    method: 'POST',
+                    // eslint-disable-next-line no-undef
+                    headers: new Headers({ 'Content-Type': 'application/json' }),
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ idToken })
+                })
                 this.loginSuccessfully(user)
                 Router.push('/admin')
                 message.success('Login successfully');
-
             } catch (er) {
                 message.error(er.message);
             } finally {
