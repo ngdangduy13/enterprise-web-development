@@ -68,7 +68,7 @@ class UploadArticle extends React.Component {
                         type="primary"
                         icon={'delete'}
                         className="button"
-                        // onClick={() => record.isActive ? this.props.deactivateUser({ userId: record._id }) : this.props.activateUser({ userId: record._id })}
+                        onClick={() => this.props.deleteArticle(record.id)}
                         style={{ marginRight: '12px' }}
                     />
                 </Tooltip>
@@ -100,10 +100,9 @@ class UploadArticle extends React.Component {
                     this.setState(state => ({
                         fileList: [...state.fileList, file],
                     }));
-                }else{
+                } else {
                     message.error('You can only upload file with .PNG, .JPEG, .JPG and Microsoft Word')
                 }
-                console.log(file)
 
                 return false;
             },
@@ -271,6 +270,7 @@ const mapDispatch = ({ userProfile, article }) => ({
     logoutFirebase: () => userProfile.logoutFirebase(),
     fetchArticles: () => article.fetchArticles(),
     uploadArticle: (title, description, files) => article.uploadArticle({ title, description, files }),
+    deleteArticle: (id) => article.deleteArticle({ id }),
 })
 
 
