@@ -1,6 +1,6 @@
 import * as React from "react";
 import AdminLayout from "../../components/AdminLayout";
-import { Row, Col, Input, Upload, Button, Icon, Tooltip, Table, Modal, Form, Tag } from 'antd';
+import { Row, Col, Input, Upload, Button, Icon, Tooltip, Table, Modal, Form, Tag, Checkbox, message } from 'antd';
 import '../../static/css/view-article.css';
 import withRematch from '../../rematch/withRematch'
 import initStore from '../../rematch/store'
@@ -18,8 +18,6 @@ class UploadArticle extends React.Component {
         this.state = {
             isVisible: false,
             fileList: [],
-            title: '',
-            description: ''
         };
     }
 
@@ -37,11 +35,11 @@ class UploadArticle extends React.Component {
         e.preventDefault();
         this.props.form.validateFields(async (error, _values) => {
             if (!error) {
-                this.props.uploadArticle(this.state.title, this.state.description, this.state.fileList[this.state.fileList.length - 1])
+                const title = this.props.form.getFieldValue('title')
+                const description = this.props.form.getFieldValue('description')
+                this.props.uploadArticle(title, description, this.state.fileList)
                 this.setState({
                     fileList: [],
-                    title: '',
-                    description: ''
                 })
                 this.props.form.resetFields()
             }
@@ -93,13 +91,27 @@ class UploadArticle extends React.Component {
                 });
             },
             beforeUpload: (file) => {
-                this.setState(state => ({
-                    fileList: [file],
-                }));
+                const isCorrectFileType = file.type === 'image/jpeg'
+                    || file.type === 'image/png'
+                    || file.type === 'image/jpg'
+                    || file.type === 'application/msword'
+                    || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                if (isCorrectFileType) {
+                    this.setState(state => ({
+                        fileList: [...state.fileList, file],
+                    }));
+                }else{
+                    message.error('You can only upload file with .PNG, .JPEG, .JPG and Microsoft Word')
+                }
+                console.log(file)
+
                 return false;
             },
             fileList,
-            accept: ".doc,.docx"
+            accept: ".doc,.docx,.jpg,.png,.jpeg ",
+            listType: 'picture',
+            className: 'upload-list-inline',
+            multiple: true
         };
         const columns = [
             {
@@ -141,22 +153,6 @@ class UploadArticle extends React.Component {
         return (
             <AdminLayout userEmail={this.props.userProfile.email} logOut={this.props.logoutFirebase}>
                 <div className="container">
-                    {/* <Row type="flex" gutter={24}>
-                        <Col lg={12} md={24} xs={24}>
-                            <div className="search">
-                                <Input.Search
-                                    className="search-input"
-                                    style={{ width: '100%' }}
-                                    placeholder='Search By Full Name/Email ...'
-                                    defaultValue={this.props.search}
-
-                                />
-                            </div>
-                        </Col>
-
-                        <Col lg={12} md={24} xs={24}>
-                        </Col>
-                    </Row> */}
                     <Row>
                         <Col span={24} className='button-flex'>
                             <div className="add">
@@ -178,37 +174,6 @@ class UploadArticle extends React.Component {
                             columns={columns}
                             dataSource={this.props.article.all}
                             rowKey={record => record._id}
-                            // onRow={(record, rowIndex) => {
-                            //     // console.log(record, rowIndex)
-                            //     return {
-                            //         onClick: (event) => { console.log(event, record) },       // click row
-                            //         onDoubleClick: (event) => { }, // double click row
-                            //         onContextMenu: (event) => { }  // right button click row
-                            //     };
-                            // }}
-                        // onChange={(pagination, _filters, sorter) => {
-                        //     this.props.fetchDataReducer({
-                        //         search: this.props.search,
-                        //         pageNumber: pagination.current,
-                        //         pageSize: pagination.pageSize,
-                        //         sortBy: sorter.field ? sorter.field : this.props.sortBy,
-                        //         asc: sorter.order ? sorter.order === 'ascend' ? true : false : this.props.asc,
-                        //     });
-                        //     this.props.fetchDataEffect({
-                        //         search: this.props.search,
-                        //         pageNumber: pagination.current,
-                        //         pageSize: pagination.pageSize,
-                        //         sortBy: sorter.field ? sorter.field : this.props.sortBy,
-                        //         asc: sorter.order ? sorter.order === 'ascend' ? true : false : this.props.asc,
-                        //     });
-                        // }}
-                        // pagination={{
-                        //     total: this.props.total,
-                        //     current: this.props.pageNumber,
-                        //     showSizeChanger: true,
-                        //     pageSize: this.props.pageSize,
-                        //     pageSizeOptions: [10, 20, 50].map((item) => String(item)),
-                        // }}
                         />
                     </div>
                     <Modal
@@ -226,17 +191,17 @@ class UploadArticle extends React.Component {
                     >
                         <div className="input-user-info">
                             <Form>
-                                <Form.Item label='Title'>
+                                <Form.Item label='Title' hasFeedback>
                                     {getFieldDecorator('title', {
                                         rules: [
-                                            { required: true, message: 'Please fill the title' },
+                                            { required: true, message: 'Please fill the title before submitting' },
                                         ],
                                     })(
                                         <Input
                                             name="title"
                                             prefix={<Icon type="mail" />}
                                             placeholder='Title'
-                                            onChange={e => this.setState({ title: e.target.value })}
+                                        // onChange={e => this.setState({ title: e.target.value })}
                                         // disabled={this.props.currentUser._id ? true : false}
                                         />
                                     )}
@@ -251,7 +216,7 @@ class UploadArticle extends React.Component {
                                             prefix={<Icon type="lock" />}
                                             name="description"
                                             placeholder='Description'
-                                            onChange={e => this.setState({ description: e.target.value })}
+                                        // onChange={e => this.setState({ description: e.target.value })}
 
                                         />,
                                     )}
@@ -262,10 +227,10 @@ class UploadArticle extends React.Component {
                                     <div className="dropbox">
                                         {getFieldDecorator('dragger', {
                                             rules: [
-                                                { required: true, message: 'Please upload article' },
+                                                { required: true, message: 'Please choose data before submitting' },
                                             ]
                                         })(
-                                            <Upload.Dragger {...propsUpload}>
+                                            <Upload.Dragger {...propsUpload} >
                                                 <p className="ant-upload-drag-icon">
                                                     <Icon type="inbox" />
                                                 </p>
@@ -274,6 +239,16 @@ class UploadArticle extends React.Component {
                                             </Upload.Dragger>
                                         )}
                                     </div>
+                                </Form.Item>
+                                <Form.Item>
+                                    {getFieldDecorator('agreement', {
+                                        valuePropName: 'checked',
+                                        rules: [
+                                            { required: true, message: 'Please accept the terms of service before submitting' },
+                                        ]
+                                    })(
+                                        <Checkbox>I have read and agree the <a href=""> terms of service</a></Checkbox>
+                                    )}
                                 </Form.Item>
                             </Form>
                         </div>
@@ -295,7 +270,7 @@ const mapDispatch = ({ userProfile, article }) => ({
     loginFirebase: (email, password) => userProfile.loginFirebase({ email, password }),
     logoutFirebase: () => userProfile.logoutFirebase(),
     fetchArticles: () => article.fetchArticles(),
-    uploadArticle: (title, description, file) => article.uploadArticle({ title, description, file }),
+    uploadArticle: (title, description, files) => article.uploadArticle({ title, description, files }),
 })
 
 

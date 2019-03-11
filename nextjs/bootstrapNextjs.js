@@ -28,13 +28,13 @@ const setupPublicRoutes = (server, app) => {
         });
     });
 
-    server.get('/admin/view-article', authorize(), async (req, res) => {
+    server.get('/student/view-article', authorize(), async (req, res) => {
         const querySnapshot = await admin.firestore().collection('articles').where("studentId", "==", req.query.profile.uid).get();
         const articles = []
         querySnapshot.forEach(doc => {
             articles.push({ ...doc.data(), id: doc.id })
         })
-        app.render(req, res, '/article/view-article', {
+        app.render(req, res, '/student/view-article', {
             articles,
             ...req.query
         });
@@ -56,6 +56,11 @@ const setupPublicRoutes = (server, app) => {
         })
             .status(200)
             .json({ idToken });
+    });
+
+    server.post('/api/logout', async (req, res) => {
+        res.clearCookie('token')
+        res.redirect('/login');
     });
 
 };

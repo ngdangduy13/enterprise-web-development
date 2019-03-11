@@ -12,12 +12,4 @@ class LandingPage extends React.Component {
 }
 
 
-const mapState = state => ({
-    count: state.userProfile
-})
-
-const mapDispatch = ({ userProfile }) => ({
-    increment: () => userProfile.increaseNumber(),
-})
-
-export default connect(mapState, mapDispatch)(LandingPage);
+export default (LandingPage);

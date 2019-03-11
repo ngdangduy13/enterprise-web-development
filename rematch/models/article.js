@@ -11,6 +11,10 @@ const initialState = {
     isBusy: false
 }
 
+const uploadToFirebase = (id, file) => {
+    firebase.storage().ref().child(`${id}/${file.name}`).put(file)
+}
+
 const article = createModel({
     state: {
         all: [],
@@ -39,13 +43,14 @@ const article = createModel({
                 this.updateBusyState(true);
                 const docRef = await firebase.firestore().collection('articles').add({
                     title: payload.title,
-                    description: payload.description,
+                    description: payload.description === undefined ? payload.description : '',
                     timestamp: moment().format('LL'),
                     studentId: rootState.userProfile.uid,
                     isPublish: false
                 });
-                console.log(rootState)
-                const storageRef = await firebase.storage().ref().child(`${docRef.id}.docx`).put(payload.file)
+                payload.files.forEach(async (file) => {
+                    await uploadToFirebase(docRef.id, file)
+                })
                 message.success('Upload successfully');
             } catch (er) {
                 console.log(er)

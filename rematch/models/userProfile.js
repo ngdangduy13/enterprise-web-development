@@ -31,7 +31,7 @@ const profileModel = createModel({
                 ...payload
             }
         },
-        logout: (state, payload) => {
+        logoutSuccessfully: (state, payload) => {
             return {
                 ...initialState,
             }
@@ -73,26 +73,37 @@ const profileModel = createModel({
                 );
                 const userRef = await firebase.firestore().collection('users').doc(resultLogin.user.uid).get();
                 const user = {
-                    email: userRef.data().fullname,
+                    email: userRef.data().email,
                     uid: resultLogin.user.uid,
                     fullname: userRef.data().fullname,
                     role: userRef.data().role
                 }
+
                 const idToken = await firebase.auth().currentUser.getIdToken();
                 fetch('/api/login', {
                     method: 'POST',
-                    // eslint-disable-next-line no-undef
                     headers: new Headers({ 'Content-Type': 'application/json' }),
                     credentials: 'same-origin',
                     body: JSON.stringify({ idToken })
                 })
+
                 this.loginSuccessfully(user)
+                const role = userRef.data().role;
                 const callbackUrl = qs.parse(window.location.search, { ignoreQueryPrefix: true })
                     .callbackUrl;
                 if (callbackUrl) {
                     Router.push(callbackUrl);
                 } else {
-                    Router.push('/admin')
+                    if (role === 'STUDENT') {
+                        Router.push('/student/view-article')
+                    } else if (role === 'ADMIN') {
+                        Router.push('/admin')
+                    } else if (role === 'COORD') {
+                        Router.push('/coord')
+                    } else {
+                        Router.push('/error?statusCode=401')
+                    }
+
                 }
                 message.success('Login successfully');
             } catch (er) {
@@ -105,7 +116,14 @@ const profileModel = createModel({
             try {
                 this.updateBusyState(true);
                 const result = await firebase.auth().signOut();
-                this.logout();
+
+                fetch('/api/logout', {
+                    method: 'POST',
+                    headers: new Headers({ 'Content-Type': 'application/json' }),
+                    credentials: 'same-origin',
+                })
+
+                this.logoutSuccessfully();
             } catch (er) {
                 message.error(er.message);
             } finally {

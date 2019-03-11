@@ -6,8 +6,8 @@ const sidebarItems = [
     icon: 'user',
     items: [
       {
-        key: '/admin/view-article',
-        path: '/admin/view-article',
+        key: '/student/view-article',
+        path: '/student/view-article',
         title: 'View/Upload',
         permissions: [],
       },
