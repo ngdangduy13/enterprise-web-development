@@ -28,7 +28,7 @@ const setupPublicRoutes = (server, app) => {
         });
     });
 
-    server.get('/student/view-article', authorize(), async (req, res) => {
+    server.get('/student/', authorize('STUDENT'), async (req, res) => {
         const querySnapshot = await admin.firestore().collection('articles').where("studentId", "==", req.query.profile.uid).get();
         const articles = []
         querySnapshot.forEach(doc => {
@@ -44,7 +44,7 @@ const setupPublicRoutes = (server, app) => {
         app.render(req, res, '/login', req.query);
     });
 
-    server.get('/admin', authorize(), async (req, res) => {
+    server.get('/admin', authorize('ADMIN'), async (req, res) => {
         app.render(req, res, '/admin', req.query);
     });
 

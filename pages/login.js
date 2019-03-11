@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Row, Col, Form, Input, Icon, Checkbox, Button } from "antd";
-import { connect } from 'react-redux'
-import '../static/css/signin.css';
-import withRematch from '../rematch/withRematch'
-import initStore from '../rematch/store'
-
+import { connect } from "react-redux";
+import "../static/css/login.css";
+import withRematch from "../rematch/withRematch";
+import initStore from "../rematch/store";
+import Head from "next/head";
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -16,10 +16,7 @@ class LoginPage extends React.Component {
     e.preventDefault();
     this.props.form.validateFields(async (error, _values) => {
       if (!error) {
-        this.props.loginFirebase(
-          this.state.email,
-          this.state.password
-        );
+        this.props.loginFirebase(this.state.email, this.state.password);
       }
     });
   };
@@ -28,13 +25,16 @@ class LoginPage extends React.Component {
     const { getFieldDecorator } = this.props.form;
     return (
       <div className="login-page">
+        <Head>
+          <title>Login</title>
+        </Head>
         <Row>
           <Col xs={2} sm={4} lg={8} />
           <Col xs={20} sm={16} lg={8}>
             <div className="login-form">
               <Form onSubmit={this.handleSubmit}>
                 <Form.Item>
-                  <h2>Log In</h2>
+                  <h2>Welcome to ....</h2>
                 </Form.Item>
 
                 <Form.Item>
@@ -97,6 +97,9 @@ class LoginPage extends React.Component {
                       Remember Me !
                     </Checkbox>
                   )}
+                  {/* <a className="login-form-forgot" href="">
+                    Forgot password
+                  </a> */}
                 </Form.Item>
 
                 <Form.Item>
@@ -121,11 +124,13 @@ class LoginPage extends React.Component {
 
 const mapState = state => ({
   userProfile: state.userProfile
-})
+});
 
 const mapDispatch = ({ userProfile }) => ({
-  loginFirebase: (email, password) => userProfile.loginFirebase({ email, password }),
-})
+  loginFirebase: (email, password) =>
+    userProfile.loginFirebase({ email, password })
+});
 
-export default withRematch(initStore, mapState, mapDispatch)(Form.create()(LoginPage));
-
+export default withRematch(initStore, mapState, mapDispatch)(
+  Form.create()(LoginPage)
+);

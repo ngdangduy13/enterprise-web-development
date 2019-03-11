@@ -1,7 +1,8 @@
 .container {
     background-color: white;
     min-height: 90vh;
-    padding: 2% 3%
+    padding: 2% 3%;
+    font: 14px "Century Gothic", Futura, sans-serif
 }
 
 .add, .refresh {

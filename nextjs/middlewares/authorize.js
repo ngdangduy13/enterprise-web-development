@@ -1,7 +1,7 @@
 const admin = require('../../firebase/admin');
 
 
-const authorize = () => {
+const authorize = (requiredPermission) => {
   return async (req, res, next) => {
     const loginUrl = `${req.protocol}://${req.get('host')}/login?callbackUrl=${req.url}`;
 
@@ -35,13 +35,13 @@ const authorize = () => {
         token: token,
       };
       // // Verify Permissions
-      // if (requiredPermission && tokenData.roles.indexOf(requiredPermission) === -1) {
-      //   res.redirect('/error?statusCode=401');
-      // }
-      // else if (!requiredPermission) {
-      //   next();
-      //   return;
-      // }
+      if (requiredPermission && user.role !== requiredPermission) {
+        res.redirect('/error?statusCode=401');
+      }
+      else if (!requiredPermission) {
+        next();
+        return;
+      }
       next();
       return;
     }

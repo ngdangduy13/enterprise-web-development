@@ -95,7 +95,7 @@ const profileModel = createModel({
                     Router.push(callbackUrl);
                 } else {
                     if (role === 'STUDENT') {
-                        Router.push('/student/view-article')
+                        Router.push('/student/')
                     } else if (role === 'ADMIN') {
                         Router.push('/admin')
                     } else if (role === 'COORD') {
