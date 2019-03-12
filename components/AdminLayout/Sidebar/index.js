@@ -34,24 +34,26 @@ class Sidebar extends React.Component {
 
   render() {
     return (
-      <div className="sidebar-menu">
-        <Menu
-          key="Menu"
-          theme="dark"
-          mode="inline"
-          openKeys={
-            sidebarItems[this.props.role] !== undefined &&
-            sidebarItems[this.props.role].map(item => item.key)
-          }
-          selectedKeys={[]}
-          style={{ padding: "16px 0", width: "100%" }}
-        >
-          {sidebarItems[this.props.role] !== undefined &&
-            sidebarItems[this.props.role].map(submenu =>
-              this.renderSubmenu(submenu)
-            )}
-        </Menu>
-      </div>
+      // <div className="sidebar-menu">
+      <Menu
+        key="Menu"
+        theme="dark"
+        mode="inline"
+        // defaultOpenKeys={
+        //   sidebarItems[this.props.role] !== undefined &&
+        //   sidebarItems[this.props.role].map(item => item.key)
+        // }
+        // defaultSelectedKeys={
+        //   sidebarItems[this.props.role] !== undefined &&
+        //   sidebarItems[this.props.role].map(item => item.key)}
+        style={{ padding: "16px 0", width: "100%" }}
+      >
+        {sidebarItems[this.props.role] !== undefined &&
+          sidebarItems[this.props.role].map(submenu =>
+            this.renderSubmenu(submenu)
+          )}
+      </Menu>
+      // </div> 
     );
   }
 }

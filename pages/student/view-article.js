@@ -96,7 +96,7 @@ class UploadArticle extends React.Component {
           file.type === "image/jpg" ||
           file.type === "application/msword" ||
           file.type ===
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         if (isCorrectFileType) {
           this.setState(state => ({
             fileList: [...state.fileList, file]
@@ -153,6 +153,8 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
+        breadcrumb={['Student', 'Article', 'View']}
+
       >
         <div className="container">
           <Row>
@@ -219,8 +221,8 @@ class UploadArticle extends React.Component {
                       name="title"
                       prefix={<Icon type="mail" />}
                       placeholder="Title"
-                      // onChange={e => this.setState({ title: e.target.value })}
-                      // disabled={this.props.currentUser._id ? true : false}
+                    // onChange={e => this.setState({ title: e.target.value })}
+                    // disabled={this.props.currentUser._id ? true : false}
                     />
                   )}
                 </Form.Item>
@@ -234,7 +236,7 @@ class UploadArticle extends React.Component {
                       prefix={<Icon type="lock" />}
                       name="description"
                       placeholder="Description"
-                      // onChange={e => this.setState({ description: e.target.value })}
+                    // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>

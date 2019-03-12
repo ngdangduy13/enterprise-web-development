@@ -74,6 +74,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
+        breadcrumb={['Student', 'Article', 'View', 'Detail']}
       >
         <div className="container">
           <div className="card-container">
@@ -82,7 +83,7 @@ class UploadArticle extends React.Component {
               bordered
               extra={`Uploaded Date: ${
                 this.props.article.selectedArticle.timestamp
-              }`}
+                }`}
             >
               <DynamicFileViewerWithNoSSR
                 fileType="docx"
@@ -98,7 +99,7 @@ class UploadArticle extends React.Component {
               bordered
               extra={`Uploaded Date: ${
                 this.props.article.selectedArticle.timestamp
-              }`}
+                }`}
             >
               <Row>
                 {this.props.article.selectedArticle.paths.images.map(item => (

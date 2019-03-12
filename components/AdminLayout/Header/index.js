@@ -30,6 +30,14 @@ const Header = (props) => {
 
   return (
     <div className="header">
+      <div className="header-left">
+        <Icon
+          className="trigger"
+          type={props.collapsed ? 'menu-unfold' : 'menu-fold'}
+          onClick={props.toggle}
+        />
+      </div>
+
       <div className="header-right">
         <Dropdown overlay={menu}>
           <span className="avatar">

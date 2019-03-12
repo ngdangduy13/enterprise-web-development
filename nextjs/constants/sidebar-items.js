@@ -34,7 +34,7 @@ const sidebarCoordItems = [
     key: "event",
     title: "Event",
     permissions: [],
-    icon: "user",
+    icon: "read",
     items: [
       {
         key: "/coord/view-event",
