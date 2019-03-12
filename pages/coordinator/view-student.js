@@ -21,6 +21,7 @@ import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import Router from "next/router";
 import firebase from "../../firebase";
+import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
@@ -49,9 +50,20 @@ class UploadArticle extends React.Component {
     });
   };
 
-  addStudent = (e) => {
-      
-  }
+  addStudent = e => {
+    e.preventDefault();
+    this.props.form.validateFields(async (error, _values) => {
+      if (!error) {
+        const email = this.props.form.getFieldValue("email");
+        const password = this.props.form.getFieldValue("password");
+        const dob = moment(this.props.form.getFieldValue("dob")).format("LL");
+        const address = this.props.form.getFieldValue("address");
+        const fullname = this.props.form.getFieldValue("fullname");
+        this.props.addStudent(email, password, address, dob, fullname);
+        this.props.form.resetFields();
+      }
+    });
+  };
 
   hasErrors = fieldsError => {
     return Object.keys(fieldsError).some(field => fieldsError[field]);
@@ -138,7 +150,7 @@ class UploadArticle extends React.Component {
             confirmLoading={this.props.student.isBusy}
             okText="Save"
             cancelText="Cancel"
-            // onOk={this.uploadArticle}
+            onOk={this.addStudent}
             onCancel={this.toggleAddStudent}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
@@ -146,19 +158,19 @@ class UploadArticle extends React.Component {
           >
             <div className="input-user-info">
               <Form>
-                <Form.Item label="Username" hasFeedback>
-                  {getFieldDecorator("username", {
+                <Form.Item label="Email" hasFeedback>
+                  {getFieldDecorator("email", {
                     rules: [
                       {
                         required: true,
-                        message: "Please fill the username before submitting"
+                        message: "Please fill the email before submitting"
                       }
                     ]
                   })(
                     <Input
-                      name="username"
+                      name="email"
                       prefix={<Icon type="mail" />}
-                      placeholder="Username"
+                      placeholder="Email"
                       // onChange={e => this.setState({ title: e.target.value })}
                       // disabled={this.props.currentUser._id ? true : false}
                     />
@@ -272,7 +284,8 @@ const mapDispatch = ({ userProfile, student }) => ({
     userProfile.loginFirebase({ email, password }),
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchStudents: () => student.fetchStudents(),
-  addStudent: (email, password, address, dob, fullname) => student.addStudent({email, password, address, dob, fullname}),
+  addStudent: (email, password, address, dob, fullname) =>
+    student.addStudent({ email, password, address, dob, fullname })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

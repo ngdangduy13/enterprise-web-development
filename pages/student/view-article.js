@@ -23,20 +23,20 @@ import firebase from "../../firebase";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    if (query.articles === undefined) {
-      const querySnapshot = await firebase
-        .firestore()
-        .collection("articles")
-        .where("studentId", "==", query.profile.uid)
-        .get();
-      const articles = [];
-      querySnapshot.forEach(doc => {
-        articles.push({ ...doc.data(), id: doc.id });
-      });
-      store.dispatch.article.fetchArticleSuccessfully(articles);
-    } else {
-      store.dispatch.article.fetchArticleSuccessfully(query.articles);
-    }
+    // if (query.articles === undefined) {
+    //   const querySnapshot = await firebase
+    //     .firestore()
+    //     .collection("articles")
+    //     .where("studentId", "==", query.profile.uid)
+    //     .get();
+    //   const articles = [];
+    //   querySnapshot.forEach(doc => {
+    //     articles.push({ ...doc.data(), id: doc.id });
+    //   });
+    //   store.dispatch.article.fetchArticleSuccessfully(articles);
+    // } else {
+    //   store.dispatch.article.fetchArticleSuccessfully(query.articles);
+    // }
   }
 
   constructor(props) {

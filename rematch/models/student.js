@@ -68,12 +68,11 @@ const student = createModel({
           fullname: payload.fullname
         };
 
-        await firebase
+        const result = await firebase
           .auth()
           .createUserWithEmailAndPassword(payload.email, payload.password);
-
         const articleRef = firebase.firestore().collection("users");
-        const resultRef = await articleRef.add(data);
+        const resultRef = await articleRef.doc(result.user.uid).set(data);
 
         message.success("Add student successfully");
       } catch (er) {
