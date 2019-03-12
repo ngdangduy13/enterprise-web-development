@@ -54,12 +54,11 @@ class UploadArticle extends React.Component {
     e.preventDefault();
     this.props.form.validateFields(async (error, _values) => {
       if (!error) {
-        const email = this.props.form.getFieldValue("email");
-        const password = this.props.form.getFieldValue("password");
-        const dob = moment(this.props.form.getFieldValue("dob")).format("LL");
-        const address = this.props.form.getFieldValue("address");
-        const fullname = this.props.form.getFieldValue("fullname");
-        this.props.addStudent(email, password, address, dob, fullname);
+        const closureDate = moment(this.props.form.getFieldValue("closureDate")).format('LL');
+        const finalClosureDate = moment(this.props.form.getFieldValue("finalClosureDate")).format('LL');
+        const name = this.props.form.getFieldValue("name");
+        const description = this.props.form.getFieldValue("description");
+        this.props.addEvent(closureDate, finalClosureDate, name, description);
         this.props.form.resetFields();
       }
     });
@@ -71,12 +70,37 @@ class UploadArticle extends React.Component {
 
   compareToFirstPassword = (rule, value, callback) => {
     const form = this.props.form;
-    if (value && value !== form.getFieldValue('password')) {
-      callback('Two passwords that you enter is inconsistent!');
+    if (value && value !== form.getFieldValue("password")) {
+      callback("Two passwords that you enter is inconsistent!");
     } else {
       callback();
     }
-  }
+  };
+
+  renderStatus = (text, record, index) => {
+    let status;
+    let color;
+    if (moment() < moment(record.closureDate)) {
+      status = "Active";
+      color = "green";
+    } else if (
+      moment() >= moment(record.closureDate) &&
+      moment() < moment(record.finalClosureDate)
+    ) {
+      status = "Processing";
+      color = "orange";
+    } else if (moment() >= moment(record.finalClosureDate)) {
+      status = "Finished";
+      color = "red";
+    }
+    return (
+      <span>
+        <Tag color={color} key={index}>
+          {status}
+        </Tag>
+      </span>
+    );
+  };
 
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
@@ -109,13 +133,7 @@ class UploadArticle extends React.Component {
         dataIndex: "isActive",
         key: "isActive",
         width: "12%",
-        render: (isActive, index) => (
-          <span>
-            <Tag color={isActive ? "#87d068" : "#f50"} key={index}>
-              {isActive ? "Active" : "Deactive"}
-            </Tag>
-          </span>
-        )
+        render: this.renderStatus
       }
     ];
     return (
@@ -154,7 +172,7 @@ class UploadArticle extends React.Component {
             />
           </div>
           <Modal
-            title="Add Student"
+            title="Add Event"
             visible={this.state.isVisible}
             confirmLoading={this.props.event.isBusy}
             okText="Save"
@@ -167,116 +185,54 @@ class UploadArticle extends React.Component {
           >
             <div className="input-user-info">
               <Form>
-                <Form.Item label="Email" hasFeedback>
-                  {getFieldDecorator("email", {
+                <Form.Item label="Event name" hasFeedback>
+                  {getFieldDecorator("name", {
                     rules: [
                       {
                         required: true,
-                        message: "Please fill the email before submitting"
+                        message: "Please fill event name before submitting"
                       }
                     ]
                   })(
                     <Input
-                      name="email"
+                      name="name"
                       prefix={<Icon type="mail" />}
-                      placeholder="Email"
-                    // onChange={e => this.setState({ title: e.target.value })}
-                    // disabled={this.props.currentUser._id ? true : false}
+                      placeholder="Name"
                     />
                   )}
                 </Form.Item>
 
-                <Form.Item label="Password" hasFeedback>
-                  {getFieldDecorator("password", {
-                    rules: [
-                      {
-                        required: true,
-                        message: "Please fill the password before submitting"
-                      }
-                    ]
-                  })(
+                <Form.Item label="Description" hasFeedback>
+                  {getFieldDecorator("description", {})(
                     <Input
                       prefix={<Icon type="lock" />}
-                      name="password"
-                      type="password"
-                      placeholder="Password"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      name="description"
+                      placeholder="Description"
                     />
                   )}
                 </Form.Item>
-                <Form.Item label="Confirm Password" hasFeedback>
-                  {getFieldDecorator("confirmPassword", {
+
+                <Form.Item label="Closure date" hasFeedback>
+                  {getFieldDecorator("closureDate", {
                     rules: [
                       {
                         required: true,
                         message:
-                          "Please fill the confirm password before submitting"
-                      }, {
-                        validator: this.compareToFirstPassword,
+                          "Please fill the closure date before submitting"
                       }
                     ]
-                  })(
-                    <Input
-                      prefix={<Icon type="lock" />}
-                      name="confirmPassword"
-                      type="password"
-                      placeholder="Confirm Password"
-                    // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
+                  })(<DatePicker style={{ width: "100%" }} />)}
                 </Form.Item>
-                <Form.Item label="Full name" hasFeedback>
-                  {getFieldDecorator("fullname", {
-                    rules: [
-                      {
-                        required: true,
-                        message: "Please fill the full name before submitting"
-                      }
-                    ]
-                  })(
-                    <Input
-                      prefix={<Icon type="profile" />}
-                      name="fullname"
-                      placeholder="Full name"
-                    // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
-                </Form.Item>
-                <Form.Item label="Date of birth" hasFeedback>
-                  {getFieldDecorator("dob", {
+                <Form.Item label="Final closure date" hasFeedback>
+                  {getFieldDecorator("finalClosureDate", {
                     rules: [
                       {
                         required: true,
                         message:
-                          "Please fill the date of birth before submitting"
+                          "Please fill the final closure date before submitting"
                       }
                     ]
-                  })(
-                    <DatePicker
-                      style={{ width: "100%" }}
-                    //   prefix={<Icon type="lock" />}
-                    //   name="dob"
-                    //   placeholder="Date of birth"
-                    // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
-                </Form.Item>
-                <Form.Item label="Address" hasFeedback>
-                  {getFieldDecorator("address", {
-                    rules: [
-                      {
-                        required: true,
-                        message: "Please fill the address before submitting"
-                      }
-                    ]
-                  })(
-                    <Input
-                      prefix={<Icon type="shop" />}
-                      name="address"
-                      placeholder="Address"
-                    // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
+                  })(<DatePicker style={{ width: "100%" }} />)}
                 </Form.Item>
               </Form>
             </div>
@@ -295,6 +251,8 @@ const mapState = state => ({
 const mapDispatch = ({ userProfile, event }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchEvents: () => event.fetchEvents(),
+  addEvent: (closureDate, finalClosureDate, name, description) =>
+    event.addEvent({ closureDate, finalClosureDate, name, description })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

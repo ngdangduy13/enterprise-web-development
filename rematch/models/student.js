@@ -36,7 +36,7 @@ const student = createModel({
         const querySnapshot = await firebase
           .firestore()
           .collection("users")
-          .where("faculityId", "==", rootState.userProfile.faculityId)
+          .where("facultyId", "==", rootState.userProfile.facultyId)
           .where("role", "==", "STUDENT")
           .get();
         const students = [];
@@ -60,7 +60,7 @@ const student = createModel({
           email: payload.email,
           address: payload.address,
           dob: payload.dob,
-          faculityId: rootState.userProfile.faculityId,
+          facultyId: rootState.userProfile.facultyId,
           role: "STUDENT",
           isActive: true,
           fullname: payload.fullname
@@ -73,6 +73,33 @@ const student = createModel({
         const resultRef = await articleRef.doc(result.user.uid).set(data);
 
         message.success("Add student successfully");
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    },
+    async toggleActiveStudent(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+        let isActive;
+        const newList = rootState.student.all.map(student => {
+          if (student.id === payload.id) {
+            isActive = !student.isActive;
+            return { ...student, isActive };
+          }
+          return { ...student };
+        });
+        const studentRef = firebase.firestore().collection("users");
+        const resultRef = studentRef.doc(payload.id).set(
+          {
+            isActive
+          },
+          { merge: true }
+        );
+        this.fetchStudentsSuccessfully(newList);
+        message.success("Change status of student successfully");
       } catch (er) {
         console.log(er);
         message.error(er.message);

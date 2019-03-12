@@ -36,7 +36,7 @@ const event = createModel({
         const querySnapshot = await firebase
           .firestore()
           .collection("events")
-          .where("faculityId", "==", rootState.userProfile.faculityId)
+          .where("facultyId", "==", rootState.userProfile.facultyId)
           .get();
         const events = [];
         querySnapshot.forEach(doc => {
@@ -56,22 +56,17 @@ const event = createModel({
       try {
         this.updateBusyState(true);
         const data = {
-          email: payload.email,
-          address: payload.address,
-          dob: payload.dob,
-          faculityId: rootState.userProfile.faculityId,
-          role: "STUDENT",
-          isActive: true,
-          fullname: payload.fullname
+          closureDate: payload.closureDate,
+          finalClosureDate: payload.finalClosureDate,
+          name: payload.name,
+          facultyId: rootState.userProfile.facultyId,
+          description: payload.description !== undefined ? payload.description : ''
         };
 
-        const result = await firebase
-          .auth()
-          .createUserWithEmailAndPassword(payload.email, payload.password);
-        const articleRef = firebase.firestore().collection("users");
-        const resultRef = await articleRef.doc(result.user.uid).set(data);
+        const eventRef = firebase.firestore().collection("events");
+        const resultRef = await eventRef.add(data);
 
-        message.success("Add student successfully");
+        message.success("Add event successfully");
       } catch (er) {
         console.log(er);
         message.error(er.message);

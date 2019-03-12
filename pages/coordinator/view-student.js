@@ -71,12 +71,38 @@ class UploadArticle extends React.Component {
 
   compareToFirstPassword = (rule, value, callback) => {
     const form = this.props.form;
-    if (value && value !== form.getFieldValue('password')) {
-      callback('Two passwords that you enter is inconsistent!');
+    if (value && value !== form.getFieldValue("password")) {
+      callback("Two passwords that you enter is inconsistent!");
     } else {
       callback();
     }
-  }
+  };
+
+  actionButtons = (text, record) => {
+    return (
+      <div className="action-buttons">
+        <Tooltip title="Edit User Info">
+          <Button
+            type="primary"
+            icon="edit"
+            className="button"
+            // onClick={(_event) => this.props.openAddUserModal({currentUser: record})}
+            style={{ marginRight: "12px" }}
+          />
+        </Tooltip>
+
+        <Tooltip>
+          <Button
+            type="primary"
+            icon={record.isActive ? "lock" : "unlock"}
+            className="button"
+            onClick={() => this.props.toggleActiveStudent(record.id)}
+            style={{ marginRight: "12px" }}
+          />
+        </Tooltip>
+      </div>
+    );
+  };
 
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
@@ -111,11 +137,17 @@ class UploadArticle extends React.Component {
         width: "12%",
         render: (isActive, index) => (
           <span>
-            <Tag color={isActive ? "#87d068" : "#f50"} key={index}>
+            <Tag color={isActive ? "green" : "red"} key={index}>
               {isActive ? "Active" : "Deactive"}
             </Tag>
           </span>
         )
+      },
+      {
+        title: "Actions",
+        dataIndex: "isActive",
+        key: "actions",
+        render: this.actionButtons
       }
     ];
     return (
@@ -180,8 +212,8 @@ class UploadArticle extends React.Component {
                       name="email"
                       prefix={<Icon type="mail" />}
                       placeholder="Email"
-                    // onChange={e => this.setState({ title: e.target.value })}
-                    // disabled={this.props.currentUser._id ? true : false}
+                      // onChange={e => this.setState({ title: e.target.value })}
+                      // disabled={this.props.currentUser._id ? true : false}
                     />
                   )}
                 </Form.Item>
@@ -200,7 +232,7 @@ class UploadArticle extends React.Component {
                       name="password"
                       type="password"
                       placeholder="Password"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -211,8 +243,9 @@ class UploadArticle extends React.Component {
                         required: true,
                         message:
                           "Please fill the confirm password before submitting"
-                      }, {
-                        validator: this.compareToFirstPassword,
+                      },
+                      {
+                        validator: this.compareToFirstPassword
                       }
                     ]
                   })(
@@ -221,7 +254,7 @@ class UploadArticle extends React.Component {
                       name="confirmPassword"
                       type="password"
                       placeholder="Confirm Password"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -238,7 +271,7 @@ class UploadArticle extends React.Component {
                       prefix={<Icon type="profile" />}
                       name="fullname"
                       placeholder="Full name"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -254,10 +287,10 @@ class UploadArticle extends React.Component {
                   })(
                     <DatePicker
                       style={{ width: "100%" }}
-                    //   prefix={<Icon type="lock" />}
-                    //   name="dob"
-                    //   placeholder="Date of birth"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      //   prefix={<Icon type="lock" />}
+                      //   name="dob"
+                      //   placeholder="Date of birth"
+                      // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -274,7 +307,7 @@ class UploadArticle extends React.Component {
                       prefix={<Icon type="shop" />}
                       name="address"
                       placeholder="Address"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -297,6 +330,7 @@ const mapDispatch = ({ userProfile, student }) => ({
     userProfile.loginFirebase({ email, password }),
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchStudents: () => student.fetchStudents(),
+  toggleActiveStudent: id => student.toggleActiveStudent({ id }),
   addStudent: (email, password, address, dob, fullname) =>
     student.addStudent({ email, password, address, dob, fullname })
 });

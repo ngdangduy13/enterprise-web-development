@@ -141,7 +141,7 @@ class UploadArticle extends React.Component {
         width: "12%",
         render: (isPublish, index) => (
           <span>
-            <Tag color={isPublish ? "#2db7f5" : "orange"} key={index}>
+            <Tag color={isPublish ? "green" : "orange"} key={index}>
               {isPublish ? "Published" : "Unpublish"}
             </Tag>
           </span>
