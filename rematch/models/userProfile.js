@@ -95,11 +95,11 @@ const profileModel = createModel({
                     Router.push(callbackUrl);
                 } else {
                     if (role === 'STUDENT') {
-                        Router.push('/student/')
+                        Router.push('/student/view-article')
                     } else if (role === 'ADMIN') {
                         Router.push('/admin')
                     } else if (role === 'COORD') {
-                        Router.push('/coord')
+                        Router.push('/coord/view-student')
                     } else {
                         Router.push('/error?statusCode=401')
                     }
@@ -116,6 +116,7 @@ const profileModel = createModel({
             try {
                 this.updateBusyState(true);
                 const result = await firebase.auth().signOut();
+                Router.push('/login')
 
                 fetch('/api/logout', {
                     method: 'POST',

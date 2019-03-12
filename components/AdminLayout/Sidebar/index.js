@@ -1,11 +1,11 @@
-import * as React from 'react';
-import { Menu, Icon } from 'antd';
-import Link from 'next/link';
-import './Sidebar.css';
-import sidebarItems from '../../../nextjs/constants/sidebar-items';
+import * as React from "react";
+import { Menu, Icon } from "antd";
+import Link from "next/link";
+import "./Sidebar.css";
+import sidebarItems from "../../../nextjs/constants/sidebar-items";
 
 class Sidebar extends React.Component {
-  renderSubmenu = (submenu) => {
+  renderSubmenu = submenu => {
     return (
       <Menu.SubMenu
         key={submenu.key}
@@ -22,7 +22,7 @@ class Sidebar extends React.Component {
     );
   };
 
-  renderMenuItem = (menuitem) => {
+  renderMenuItem = menuitem => {
     return (
       <Menu.Item key={`${menuitem.key}`} className="submenu-item">
         <Link href={menuitem.path}>
@@ -39,11 +39,17 @@ class Sidebar extends React.Component {
           key="Menu"
           theme="dark"
           mode="inline"
-          openKeys={sidebarItems.map((item) => item.key)}
+          openKeys={
+            sidebarItems[this.props.role] !== undefined &&
+            sidebarItems[this.props.role].map(item => item.key)
+          }
           selectedKeys={[]}
-          style={{ padding: '16px 0', width: '100%' }}
+          style={{ padding: "16px 0", width: "100%" }}
         >
-          {sidebarItems.map(submenu => this.renderSubmenu(submenu))}
+          {sidebarItems[this.props.role] !== undefined &&
+            sidebarItems[this.props.role].map(submenu =>
+              this.renderSubmenu(submenu)
+            )}
         </Menu>
       </div>
     );
