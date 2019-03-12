@@ -29,6 +29,20 @@ const sidebarCoordItems = [
         permissions: []
       }
     ]
+  },
+  {
+    key: "event",
+    title: "Event",
+    permissions: [],
+    icon: "user",
+    items: [
+      {
+        key: "/coord/view-event",
+        path: "/coord/view-event",
+        title: "View/Insert",
+        permissions: []
+      }
+    ]
   }
 ];
 

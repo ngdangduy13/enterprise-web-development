@@ -10,7 +10,7 @@ const initialState = {
   isBusy: false
 };
 
-const student = createModel({
+const event = createModel({
   state: {
     all: [],
     isBusy: false
@@ -22,7 +22,7 @@ const student = createModel({
         isBusy: payload
       };
     },
-    fetchStudentsSuccessfully: (state, payload) => {
+    fetchEventsSuccessfully: (state, payload) => {
       return {
         ...state,
         all: payload
@@ -30,22 +30,21 @@ const student = createModel({
     }
   },
   effects: dispatch => ({
-    async fetchStudents(payload, rootState) {
+    async fetchEvents(payload, rootState) {
       try {
         this.updateBusyState(true);
         const querySnapshot = await firebase
           .firestore()
-          .collection("users")
+          .collection("events")
           .where("faculityId", "==", rootState.userProfile.faculityId)
-          .where("role", "==", "STUDENT")
           .get();
-        const students = [];
+        const events = [];
         querySnapshot.forEach(doc => {
-          students.push({ ...doc.data(), id: doc.id });
+          events.push({ ...doc.data(), id: doc.id });
         });
-        message.success("Fetch students successfully");
+        message.success("Fetch events successfully");
 
-        this.fetchStudentsSuccessfully(students);
+        this.fetchEventsSuccessfully(events);
       } catch (er) {
         console.log(er);
         message.error(er.message);
@@ -53,7 +52,7 @@ const student = createModel({
         this.updateBusyState(false);
       }
     },
-    async addStudent(payload, rootState) {
+    async addEvent(payload, rootState) {
       try {
         this.updateBusyState(true);
         const data = {
@@ -83,4 +82,4 @@ const student = createModel({
   })
 });
 
-export default student;
+export default event;

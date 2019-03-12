@@ -44,13 +44,13 @@ class UploadArticle extends React.Component {
     };
   }
 
-  toggleAddStudent = () => {
+  toggleAddEvent = () => {
     this.setState({
       isVisible: !this.state.isVisible
     });
   };
 
-  addStudent = e => {
+  addEvent = e => {
     e.preventDefault();
     this.props.form.validateFields(async (error, _values) => {
       if (!error) {
@@ -82,27 +82,27 @@ class UploadArticle extends React.Component {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const columns = [
       {
-        title: "Email",
-        dataIndex: "email",
-        key: "email",
+        title: "Event Name",
+        dataIndex: "name",
+        key: "name",
         sorter: true
       },
       {
-        title: "Full name",
-        dataIndex: "fullname",
-        key: "fullname",
+        title: "Description",
+        dataIndex: "description",
+        key: "description",
         width: "20%"
         // sorter: true,
       },
       {
-        title: "Date of birth",
-        dataIndex: "dob",
-        key: "dob"
+        title: "Closure Date",
+        dataIndex: "closureDate",
+        key: "closureDate"
       },
       {
-        title: "Address",
-        dataIndex: "address",
-        key: "address"
+        title: "Final Closure Date",
+        dataIndex: "finalClosureDate",
+        key: "finalClosureDate"
       },
       {
         title: "Status",
@@ -128,16 +128,16 @@ class UploadArticle extends React.Component {
           <Row>
             <Col span={24} className="button-flex">
               <div className="add">
-                <Button type="primary" onClick={this.toggleAddStudent}>
-                  <Icon type="plus" /> Add New Student
+                <Button type="primary" onClick={this.toggleAddEvent}>
+                  <Icon type="plus" /> Add New Event
                 </Button>
               </div>
               <div className="refresh">
                 <Button
                   type="primary"
                   icon="sync"
-                  onClick={this.props.fetchStudents}
-                  loading={this.props.student.isBusy}
+                  onClick={this.props.fetchEvents}
+                  loading={this.props.event.isBusy}
                 >
                   Refresh
                 </Button>
@@ -147,20 +147,20 @@ class UploadArticle extends React.Component {
           <div className="users-table">
             <Table
               size="middle"
-              loading={this.props.student.isBusy}
+              loading={this.props.event.isBusy}
               columns={columns}
-              dataSource={this.props.student.all}
+              dataSource={this.props.event.all}
               rowKey={record => record._id}
             />
           </div>
           <Modal
             title="Add Student"
             visible={this.state.isVisible}
-            confirmLoading={this.props.student.isBusy}
+            confirmLoading={this.props.event.isBusy}
             okText="Save"
             cancelText="Cancel"
-            onOk={this.addStudent}
-            onCancel={this.toggleAddStudent}
+            onOk={this.addEvent}
+            onCancel={this.toggleAddEvent}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
             }}
@@ -289,16 +289,12 @@ class UploadArticle extends React.Component {
 
 const mapState = state => ({
   userProfile: state.userProfile,
-  student: state.student
+  event: state.event
 });
 
-const mapDispatch = ({ userProfile, student }) => ({
-  loginFirebase: (email, password) =>
-    userProfile.loginFirebase({ email, password }),
+const mapDispatch = ({ userProfile, event }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
-  fetchStudents: () => student.fetchStudents(),
-  addStudent: (email, password, address, dob, fullname) =>
-    student.addStudent({ email, password, address, dob, fullname })
+  fetchEvents: () => event.fetchEvents(),
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

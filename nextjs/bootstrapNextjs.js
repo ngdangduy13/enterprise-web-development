@@ -82,6 +82,10 @@ const setupPublicRoutes = (server, app) => {
     app.render(req, res, "/coordinator/view-student", req.query);
   });
 
+  server.get("/coord/view-event", authorize("COORD"), async (req, res) => {
+    app.render(req, res, "/coordinator/view-event", req.query);
+  });
+
   server.get("/login", async (req, res) => {
     app.render(req, res, "/login", req.query);
   });

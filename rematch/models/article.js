@@ -107,7 +107,7 @@ const article = createModel({
                     articles.push({ ...doc.data(), id: doc.id })
                 })
                 console.log(articles)
-                message.success('Fetching articles successfully');
+                message.success('Fetch articles successfully');
 
                 this.fetchArticleSuccessfully(articles)
             } catch (er) {

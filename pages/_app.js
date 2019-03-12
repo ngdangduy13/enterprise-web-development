@@ -1,5 +1,7 @@
 import App, { Container } from 'next/app'
 import React from 'react'
+import NProgress from "next-nprogress/component";
+
 
 export default class FinalProject extends App {
   static async getInitialProps({ Component, router, ctx }) {
@@ -15,7 +17,10 @@ export default class FinalProject extends App {
   render() {
     const { Component, pageProps } = this.props
     return <Container>
-      <Component {...pageProps} />
+      <Component {...pageProps} >
+        <NProgress />
+      </Component>
     </Container>
   }
 }
+

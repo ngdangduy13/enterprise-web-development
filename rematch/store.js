@@ -1,6 +1,7 @@
 import { init } from '@rematch/core';
 import userProfile from './models/userProfile';
 import student from './models/student';
+import event from './models/event';
 import article from './models/article';
 
 
@@ -9,7 +10,8 @@ export const initStore = (initialState) => {
         models: {
             userProfile,
             article,
-            student
+            student,
+            event
         },
         redux: {
             initialState
