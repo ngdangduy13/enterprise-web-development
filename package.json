@@ -39,6 +39,8 @@
     "qs": "^6.6.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
+    "react-file-viewer": "^1.1.0",
+    "react-no-ssr": "^1.1.0",
     "react-redux": "^6.0.1",
     "recompose": "^0.30.0"
   },

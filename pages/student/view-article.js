@@ -4,13 +4,23 @@ import { Row, Col, Input, Upload, Button, Icon, Tooltip, Table, Modal, Form, Tag
 import '../../static/css/view-article.css';
 import withRematch from '../../rematch/withRematch'
 import initStore from '../../rematch/store'
+import Router from 'next/router';
+import firebase from '../../firebase'
 
 
 
 class UploadArticle extends React.Component {
-    static getInitialProps({ store, isServer, pathname, query }) {
-        // const userProfile = store.getState().userProfile; // component will be able to read from store's state when rendered
-        store.dispatch.article.fetchArticleSuccessfully(query.articles);
+    static async getInitialProps({ store, isServer, pathname, query }) {
+        if (query.articles === undefined) {
+            const querySnapshot = await firebase.firestore().collection('articles').where("studentId", "==", req.query.profile.uid).get();
+            const articles = []
+            querySnapshot.forEach(doc => {
+                articles.push({ ...doc.data(), id: doc.id })
+            })
+            store.dispatch.article.fetchArticleSuccessfully(articles)
+        } else {
+            store.dispatch.article.fetchArticleSuccessfully(query.articles)
+        }
     }
 
     constructor(props) {
@@ -49,32 +59,6 @@ class UploadArticle extends React.Component {
     hasErrors = (fieldsError) => {
         return Object.keys(fieldsError).some(field => fieldsError[field]);
     }
-
-    actionButtons = (record, index) => {
-        return (
-            <div className="action-buttons">
-                <Tooltip title='Edit Article'>
-                    <Button
-                        type="primary"
-                        icon="edit"
-                        className="button"
-                        // onClick={(_event) => this.props.openAddUserModal({ currentUser: record })}
-                        style={{ marginRight: '12px' }}
-                    />
-                </Tooltip>
-
-                <Tooltip title={'Delete Article'}>
-                    <Button
-                        type="primary"
-                        icon={'delete'}
-                        className="button"
-                        onClick={() => this.props.deleteArticle(record.id)}
-                        style={{ marginRight: '12px' }}
-                    />
-                </Tooltip>
-            </div>
-        );
-    };
 
     render() {
         const { getFieldDecorator, getFieldsError } = this.props.form;
@@ -142,12 +126,6 @@ class UploadArticle extends React.Component {
                     </span>
                 )
             },
-            {
-                title: 'Action',
-                key: 'action',
-                width: '12%',
-                render: this.actionButtons
-            },
         ];
         return (
             <AdminLayout userEmail={this.props.userProfile.email} logOut={this.props.logoutFirebase}>
@@ -173,6 +151,14 @@ class UploadArticle extends React.Component {
                             columns={columns}
                             dataSource={this.props.article.all}
                             rowKey={record => record._id}
+                            onRow={(record, rowIndex) => {
+                                return {
+                                    onClick: (event) => {
+                                        Router.push(`/student/detail-article?articleId=${record.id}`)
+                                    },       // click row
+
+                                };
+                            }}
                         />
                     </div>
                     <Modal

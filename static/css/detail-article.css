@@ -1,0 +1,13 @@
+.document-container {
+    overflow: auto;
+    height: 800px;
+    width: 100% !important
+}
+
+.pg-viewer-wrapper {
+    overflow: hidden !important;
+}
+
+.card-container {
+    margin-bottom: 20px !important;
+}

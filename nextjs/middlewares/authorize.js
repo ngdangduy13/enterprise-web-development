@@ -36,7 +36,7 @@ const authorize = (requiredPermission) => {
       };
       // // Verify Permissions
       if (requiredPermission && user.role !== requiredPermission) {
-        res.redirect('/error?statusCode=401');
+        res.redirect('/error');
       }
       else if (!requiredPermission) {
         next();

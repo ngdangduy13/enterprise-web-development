@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 const initialState = {
     all: [],
-
+    selectedArticle: {},
     isBusy: false
 }
 
@@ -19,7 +19,7 @@ const uploadToFirebase = (id, file) => {
 const article = createModel({
     state: {
         all: [],
-
+        selectedArticle: {},
         isBusy: false
     },
     reducers: {
@@ -33,6 +33,12 @@ const article = createModel({
             return {
                 ...state,
                 all: payload
+            }
+        },
+        findArticleSuccessfully: (state, payload) => {
+            return {
+                ...state,
+                selectedArticle: payload
             }
         },
         deleteArticleSuccessfully: (state, payload) => {
@@ -60,14 +66,15 @@ const article = createModel({
                 const articleRef = firebase.firestore().collection('articles')
                 const resultRef = await articleRef.add(data);
 
+
+
+                await payload.files.forEach(async (file) => {
+                    await uploadToFirebase(resultRef.id, file)
+                })
                 const paths = payload.files.map(item => `${resultRef.id}/${item.name}`);
                 articleRef.doc(resultRef.id).set({
                     paths
                 }, { merge: true })
-
-                payload.files.forEach((file) => {
-                    uploadToFirebase(resultRef.id, file)
-                })
 
                 message.success('Upload successfully');
             } catch (er) {
@@ -109,7 +116,7 @@ const article = createModel({
             } finally {
                 this.updateBusyState(false);
             }
-        }
+        },
     })
 });
 

@@ -28,7 +28,7 @@ const setupPublicRoutes = (server, app) => {
         });
     });
 
-    server.get('/student/', authorize('STUDENT'), async (req, res) => {
+    server.get('/student/view-article', authorize('STUDENT'), async (req, res) => {
         const querySnapshot = await admin.firestore().collection('articles').where("studentId", "==", req.query.profile.uid).get();
         const articles = []
         querySnapshot.forEach(doc => {
@@ -39,6 +39,27 @@ const setupPublicRoutes = (server, app) => {
             ...req.query
         });
     });
+
+    server.get('/student/detail-article/:articleId', authorize('STUDENT'), async (req, res) => {
+        const userRef = await firebase.firestore().collection('articles').doc(res.query.articleId).get();
+        const paths = {
+            document: [],
+            images: []
+        }
+        for (const path of userRef.data().paths) {
+            const downloadUrl = await firebase.storage().ref(path).getDownloadURL()
+            if (path.split('.')[1] === 'doc' || path.split('.')[1] === 'docx') {
+                paths.document.push(downloadUrl)
+            } else {
+                paths.images.push(downloadUrl)
+            }
+        }
+        app.render(req, res, '/student/detail-article', {
+            selectedArticle: {...userRef.data(), paths},
+            ...req.query
+        });
+    });
+
 
     server.get('/login', async (req, res) => {
         app.render(req, res, '/login', req.query);
