@@ -97,9 +97,9 @@ class LoginPage extends React.Component {
                       Remember Me !
                     </Checkbox>
                   )}
-                  {/* <a className="login-form-forgot" href="">
+                  <a className="login-form-forgot" href="">
                     Forgot password
-                  </a> */}
+                  </a>
                 </Form.Item>
 
                 <Form.Item>
