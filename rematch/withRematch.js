@@ -45,15 +45,9 @@ export default (...args) => Component => {
 
   ComponentWithRematch.getInitialProps = async (props) => {
     const isServer = checkServer();
-    let store;
-    if (props.query.profile) {
-      store = getOrCreateStore(initStore, {
-        userProfile: props.query.profile,
-      })
-    } else {
-      store = getOrCreateStore(initStore)
-    }
-
+    const store = getOrCreateStore(initStore, {
+      userProfile: props.query.profile,
+    });
 
     // Run page getInitialProps with store and isServer
     const initialProps = Component.getInitialProps

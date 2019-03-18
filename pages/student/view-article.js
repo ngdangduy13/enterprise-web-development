@@ -13,7 +13,8 @@ import {
   Form,
   Tag,
   Checkbox,
-  message
+  message,
+  Select
 } from "antd";
 import "../../static/css/view-article.css";
 import withRematch from "../../rematch/withRematch";
@@ -23,20 +24,20 @@ import firebase from "../../firebase";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    // if (query.articles === undefined) {
-    //   const querySnapshot = await firebase
-    //     .firestore()
-    //     .collection("articles")
-    //     .where("studentId", "==", query.profile.uid)
-    //     .get();
-    //   const articles = [];
-    //   querySnapshot.forEach(doc => {
-    //     articles.push({ ...doc.data(), id: doc.id });
-    //   });
-    //   store.dispatch.article.fetchArticleSuccessfully(articles);
-    // } else {
-    //   store.dispatch.article.fetchArticleSuccessfully(query.articles);
-    // }
+    if (query.articles) {
+      store.dispatch.article.fetchArticleSuccessfully(query.articles);
+    } else {
+      const querySnapshotArticles = await firebase
+        .firestore()
+        .collection("articles")
+        .where("studentId", "==", store.getState().userProfile.uid)
+        .get();
+      const articles = [];
+      querySnapshotArticles.forEach(doc => {
+        articles.push({ ...doc.data(), id: doc.id });
+      });
+      store.dispatch.article.fetchArticleSuccessfully(articles);
+    }
   }
 
   constructor(props) {
@@ -47,11 +48,10 @@ class UploadArticle extends React.Component {
     };
   }
 
-  // componentDidMount = () => {
-  //     this.props.fetchArticles();
-  // }
-
   toggleUploadArticle = () => {
+    if (!this.state.isVisible) {
+      this.props.fetchEvents();
+    }
     this.setState({
       isVisible: !this.state.isVisible
     });
@@ -63,7 +63,13 @@ class UploadArticle extends React.Component {
       if (!error) {
         const title = this.props.form.getFieldValue("title");
         const description = this.props.form.getFieldValue("description");
-        this.props.uploadArticle(title, description, this.state.fileList);
+        const event = this.props.form.getFieldValue("event");
+        this.props.uploadArticle(
+          title,
+          description,
+          this.state.fileList,
+          event
+        );
         this.setState({
           fileList: []
         });
@@ -73,6 +79,24 @@ class UploadArticle extends React.Component {
   };
   hasErrors = fieldsError => {
     return Object.keys(fieldsError).some(field => fieldsError[field]);
+  };
+
+  actionButtons = (text, record) => {
+    return (
+      <div className="action-buttons">
+        <Tooltip title={"View details"}>
+          <Button
+            type="primary"
+            icon="info-circle"
+            className="button"
+            onClick={() =>
+              Router.push(`/student/detail-article?articleId=${record.id}`)
+            }
+            style={{ marginRight: "12px" }}
+          />
+        </Tooltip>
+      </div>
+    );
   };
 
   render() {
@@ -96,7 +120,7 @@ class UploadArticle extends React.Component {
           file.type === "image/jpg" ||
           file.type === "application/msword" ||
           file.type ===
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         if (isCorrectFileType) {
           this.setState(state => ({
             fileList: [...state.fileList, file]
@@ -146,6 +170,12 @@ class UploadArticle extends React.Component {
             </Tag>
           </span>
         )
+      },
+      {
+        title: "Actions",
+        dataIndex: "actions",
+        key: "actions",
+        render: this.actionButtons
       }
     ];
     return (
@@ -153,8 +183,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={['Student', 'Article', 'View']}
-
+        breadcrumb={["Student", "Article", "View"]}
       >
         <div className="container">
           <Row>
@@ -183,15 +212,6 @@ class UploadArticle extends React.Component {
               columns={columns}
               dataSource={this.props.article.all}
               rowKey={record => record._id}
-              onRow={(record, rowIndex) => {
-                return {
-                  onClick: event => {
-                    Router.push(
-                      `/student/detail-article?articleId=${record.id}`
-                    );
-                  } // click row
-                };
-              }}
             />
           </div>
           <Modal
@@ -206,6 +226,7 @@ class UploadArticle extends React.Component {
               disabled: this.hasErrors(getFieldsError())
             }}
           >
+            <div className="modal-loading" />
             <div className="input-user-info">
               <Form>
                 <Form.Item label="Title" hasFeedback>
@@ -221,8 +242,8 @@ class UploadArticle extends React.Component {
                       name="title"
                       prefix={<Icon type="mail" />}
                       placeholder="Title"
-                    // onChange={e => this.setState({ title: e.target.value })}
-                    // disabled={this.props.currentUser._id ? true : false}
+                      // onChange={e => this.setState({ title: e.target.value })}
+                      // disabled={this.props.currentUser._id ? true : false}
                     />
                   )}
                 </Form.Item>
@@ -236,8 +257,31 @@ class UploadArticle extends React.Component {
                       prefix={<Icon type="lock" />}
                       name="description"
                       placeholder="Description"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      // onChange={e => this.setState({ description: e.target.value })}
                     />
+                  )}
+                </Form.Item>
+                <Form.Item label="Events">
+                  {getFieldDecorator("event", {
+                    rules: [
+                      {
+                        required: true,
+                        message: "Please choose event before submitting"
+                      }
+                    ],
+                    validateTrigger: "onBlur",
+                    validateFirst: true
+                  })(
+                    <Select
+                      disabled={this.props.event.isBusy}
+                      style={{ width: "100%" }}
+                    >
+                      {this.props.event.all.map(item => (
+                        <Select.Option value={item.id}>
+                          {item.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
                   )}
                 </Form.Item>
                 <Form.Item label="Article">
@@ -292,17 +336,19 @@ class UploadArticle extends React.Component {
 
 const mapState = state => ({
   userProfile: state.userProfile,
-  article: state.article
+  article: state.article,
+  event: state.event
 });
 
-const mapDispatch = ({ userProfile, article }) => ({
+const mapDispatch = ({ userProfile, article, event }) => ({
   loginFirebase: (email, password) =>
     userProfile.loginFirebase({ email, password }),
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchArticles: () => article.fetchArticles(),
-  uploadArticle: (title, description, files) =>
-    article.uploadArticle({ title, description, files }),
-  deleteArticle: id => article.deleteArticle({ id })
+  uploadArticle: (title, description, files, eventId) =>
+    article.uploadArticle({ title, description, files, eventId }),
+  deleteArticle: id => article.deleteArticle({ id }),
+  fetchEvents: () => event.fetchEvents()
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

@@ -4,6 +4,7 @@ import firebase from "../../firebase";
 import Router from "next/router";
 import moment from "moment";
 import _ from "lodash";
+import { root } from "postcss";
 
 const initialState = {
   all: [],
@@ -33,6 +34,7 @@ const event = createModel({
     async fetchEvents(payload, rootState) {
       try {
         this.updateBusyState(true);
+        console.log(rootState);
         const querySnapshot = await firebase
           .firestore()
           .collection("events")

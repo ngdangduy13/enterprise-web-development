@@ -25,16 +25,20 @@ import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    // if (query.articles === undefined) {
-    //     const querySnapshot = await firebase.firestore().collection('articles').where("studentId", "==", req.query.profile.uid).get();
-    //     const articles = []
-    //     querySnapshot.forEach(doc => {
-    //         articles.push({ ...doc.data(), id: doc.id })
-    //     })
-    //     store.dispatch.article.fetchArticleSuccessfully(articles)
-    // } else {
-    //     store.dispatch.article.fetchArticleSuccessfully(query.articles)
-    // }
+    if (query.events === undefined) {
+      const querySnapshot = await firebase
+        .firestore()
+        .collection("events")
+        .where("facultyId", "==", store.getState().userProfile.facultyId)
+        .get();
+      const events = [];
+      querySnapshot.forEach(doc => {
+        events.push({ ...doc.data(), id: doc.id });
+      });
+      store.dispatch.event.fetchEventsSuccessfully(events);
+    } else {
+      store.dispatch.event.fetchEventsSuccessfully(query.events);
+    }
   }
 
   constructor(props) {
@@ -50,12 +54,17 @@ class UploadArticle extends React.Component {
     });
   };
 
+
   addEvent = e => {
     e.preventDefault();
     this.props.form.validateFields(async (error, _values) => {
       if (!error) {
-        const closureDate = moment(this.props.form.getFieldValue("closureDate")).format('LL');
-        const finalClosureDate = moment(this.props.form.getFieldValue("finalClosureDate")).format('LL');
+        const closureDate = moment(
+          this.props.form.getFieldValue("closureDate")
+        ).format("LL");
+        const finalClosureDate = moment(
+          this.props.form.getFieldValue("finalClosureDate")
+        ).format("LL");
         const name = this.props.form.getFieldValue("name");
         const description = this.props.form.getFieldValue("description");
         this.props.addEvent(closureDate, finalClosureDate, name, description);
@@ -141,8 +150,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={['Coordinator', 'Event', 'View']}
-
+        breadcrumb={["Coordinator", "Event", "View"]}
       >
         <div className="container">
           <Row>

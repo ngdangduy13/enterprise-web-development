@@ -26,32 +26,29 @@ const DynamicFileViewerWithNoSSR = dynamic(() => import("react-file-viewer"), {
   ssr: false
 });
 
-class UploadArticle extends React.Component {
+class DetailUploadedArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    if (query.selectedArticle === undefined) {
-      const userRef = await firebase
-        .firestore()
-        .collection("articles")
-        .doc(query.articleId)
-        .get();
-      const paths = {
-        document: [],
-        images: []
-      };
-      for (const path of userRef.data().paths) {
-        if (path.split(".")[1] === "doc" || path.split(".")[1] === "docx") {
-          paths.document.push(path);
-        } else {
-          paths.images.push(path);
-        }
+    const userRef = await firebase
+      .firestore()
+      .collection("articles")
+      .doc(query.articleId)
+      .get();
+    const paths = {
+      document: [],
+      images: []
+    };
+
+    for (const path of userRef.data().paths) {
+      if (path.split(".")[1] === "doc" || path.split(".")[1] === "docx") {
+        paths.document.push(path);
+      } else {
+        paths.images.push(path);
       }
-      store.dispatch.article.findArticleSuccessfully({
-        ...userRef.data(),
-        paths
-      });
-    } else {
-      store.dispatch.article.findArticleSuccessfully(query.selectedArticle);
     }
+    store.dispatch.article.findArticleSuccessfully({
+      ...userRef.data(),
+      paths
+    });
   }
 
   constructor(props) {
@@ -63,14 +60,22 @@ class UploadArticle extends React.Component {
     console.log(e, "error in file-viewer");
   }
 
+  convertPath = path => {
+    return path.replace("/", "%2F");
+  };
+
   render() {
-    console.log(this.props.article);
     return (
       <AdminLayout
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Student", "Article", "View", "Detail"]}
+        breadcrumb={[
+          "Coordinator",
+          "Event",
+          "Manage uploaded articles",
+          "Detail"
+        ]}
       >
         <div className="container">
           <div className="card-container">
@@ -126,10 +131,9 @@ const mapState = state => ({
 });
 
 const mapDispatch = ({ userProfile, article }) => ({
-  logoutFirebase: () => userProfile.logoutFirebase(),
-  deleteArticle: id => article.deleteArticle({ id })
+  logoutFirebase: () => userProfile.logoutFirebase()
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(
-  Form.create()(UploadArticle)
+  Form.create()(DetailUploadedArticle)
 );

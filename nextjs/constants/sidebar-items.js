@@ -41,6 +41,12 @@ const sidebarCoordItems = [
         path: "/coord/view-event",
         title: "View/Insert",
         permissions: []
+      },
+      {
+        key: "/coord/manage-uploaded-article",
+        path: "/coord/manage-uploaded-article",
+        title: "Manage uploaded articles",
+        permissions: []
       }
     ]
   }

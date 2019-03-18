@@ -88,7 +88,6 @@ const profileModel = createModel({
           message.error('Your account is locked. Please contact admin for more information');
           return;
         }
-
         const idToken = await firebase.auth().currentUser.getIdToken();
         fetch("/api/login", {
           method: "POST",

@@ -48,28 +48,29 @@ const setupPublicRoutes = (server, app) => {
   );
 
   server.get(
-    "/student/detail-article/:articleId",
+    "/student/detail-article/",
     authorize("STUDENT"),
     async (req, res) => {
-      const userRef = await firebase
+      const userRef = await admin
         .firestore()
         .collection("articles")
-        .doc(res.query.articleId)
+        .doc(req.query.articleId)
         .get();
       const paths = {
         document: [],
         images: []
       };
       for (const path of userRef.data().paths) {
-        const downloadUrl = await firebase
+        const downloadUrl = await admin
           .storage()
-          .ref(path)
-          .getDownloadURL();
-        if (path.split(".")[1] === "doc" || path.split(".")[1] === "docx") {
-          paths.document.push(downloadUrl);
-        } else {
-          paths.images.push(downloadUrl);
-        }
+          .bucket()
+          .file(path)
+          .getSignedUrl();
+        // if (path.split(".")[1] === "doc" || path.split(".")[1] === "docx") {
+        //   paths.document.push(downloadUrl);
+        // } else {
+        //   paths.images.push(downloadUrl);
+        // }
       }
       app.render(req, res, "/student/detail-article", {
         selectedArticle: { ...userRef.data(), paths },
@@ -79,11 +80,64 @@ const setupPublicRoutes = (server, app) => {
   );
 
   server.get("/coord/view-student", authorize("COORD"), async (req, res) => {
-    app.render(req, res, "/coordinator/view-student", req.query);
+    const querySnapshot = await admin
+      .firestore()
+      .collection("users")
+      .where("facultyId", "==", req.query.profile.facultyId)
+      .where("role", "==", "STUDENT")
+      .get();
+    const students = [];
+    querySnapshot.forEach(doc => {
+      students.push({ ...doc.data(), id: doc.id });
+    });
+    app.render(req, res, "/coordinator/view-student", {
+      students,
+      ...req.query
+    });
   });
 
+  server.get(
+    "/coord/manage-uploaded-article",
+    authorize("COORD"),
+    async (req, res) => {
+      const querySnapshot = await admin
+        .firestore()
+        .collection("articles")
+        .where("facultyId", "==", req.query.profile.facultyId)
+        .get();
+      const articles = [];
+      querySnapshot.forEach(doc => {
+        articles.push({ ...doc.data(), id: doc.id });
+      });
+      app.render(req, res, "/coordinator/manage-uploaded-article", {
+        articles,
+        ...req.query
+      });
+    }
+  );
+
+  server.get(
+    "/coord/detail-uploaded-article/",
+    authorize("COORD"),
+    async (req, res) => {
+      app.render(req, res, "/coordinator/detail-uploaded-article", req.query);
+    }
+  );
+
   server.get("/coord/view-event", authorize("COORD"), async (req, res) => {
-    app.render(req, res, "/coordinator/view-event", req.query);
+    const querySnapshot = await admin
+      .firestore()
+      .collection("events")
+      .where("facultyId", "==", req.query.profile.facultyId)
+      .get();
+    const events = [];
+    querySnapshot.forEach(doc => {
+      events.push({ ...doc.data(), id: doc.id });
+    });
+    app.render(req, res, "/coordinator/view-event", {
+      events,
+      ...req.query
+    });
   });
 
   server.get("/login", async (req, res) => {
