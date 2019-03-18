@@ -15,10 +15,9 @@ import {
   Checkbox,
   message
 } from "antd";
-import "../../static/css/detail-article.css";
+import "../../static/css/student/detail-article.css";
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
-// import FileViewer from 'react-file-viewer';
 import dynamic from "next/dynamic";
 import firebase from "../../firebase";
 
@@ -63,6 +62,10 @@ class UploadArticle extends React.Component {
     console.log(e, "error in file-viewer");
   }
 
+  convertPath = path => {
+    return path.replace("/", "%2F");
+  };
+
   render() {
     console.log(this.props.article);
     return (
@@ -79,7 +82,7 @@ class UploadArticle extends React.Component {
               bordered
               extra={`Uploaded Date: ${
                 this.props.article.selectedArticle.timestamp
-              }`}
+                }`}
             >
               <DynamicFileViewerWithNoSSR
                 fileType="docx"
@@ -88,31 +91,30 @@ class UploadArticle extends React.Component {
                 )}?alt=media`}
                 onError={this.onError}
               />
+              <div className="image-container">
+                <Card
+                  type="inner"
+                  title="Images"
+                  bordered
+                  size="small"
+                >
+                  <Row>
+                    {this.props.article.selectedArticle.paths.images.map(item => (
+                      <Col xs={24} sm={16} lg={8}>
+                        <img
+                          alt="example"
+                          style={{ width: "100%" }}
+                          src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
+                            item
+                          )}?alt=media`}
+                        />
+                      </Col>
+                    ))}
+                  </Row>
+                </Card>
+              </div>
             </Card>
-          </div>
 
-          <div className="card-container">
-            <Card
-              title="Images"
-              bordered
-              extra={`Uploaded Date: ${
-                this.props.article.selectedArticle.timestamp
-              }`}
-            >
-              <Row>
-                {this.props.article.selectedArticle.paths.images.map(item => (
-                  <Col xs={24} sm={16} lg={8}>
-                    <img
-                      alt="example"
-                      style={{ width: "100%" }}
-                      src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                        item
-                      )}?alt=media`}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </Card>
           </div>
         </div>
       </AdminLayout>

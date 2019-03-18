@@ -16,7 +16,7 @@ import {
   message,
   DatePicker
 } from "antd";
-import "../../static/css/view-article.css";
+import "../../static/css/coord/view-event.css";
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import Router from "next/router";

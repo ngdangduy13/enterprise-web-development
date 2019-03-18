@@ -15,14 +15,18 @@ import {
   Checkbox,
   message
 } from "antd";
-import "../../static/css/detail-article.css";
+import "../../static/css/coord/detail-article.css";
+import 'braft-editor/dist/index.css';
+
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
-// import FileViewer from 'react-file-viewer';
 import dynamic from "next/dynamic";
 import firebase from "../../firebase";
-
 const DynamicFileViewerWithNoSSR = dynamic(() => import("react-file-viewer"), {
+  ssr: false
+});
+
+const DynamicBraftEditorWithNoSSR = dynamic(() => import("braft-editor"), {
   ssr: false
 });
 
@@ -47,13 +51,20 @@ class DetailUploadedArticle extends React.Component {
     }
     store.dispatch.article.findArticleSuccessfully({
       ...userRef.data(),
-      paths
+      paths,
+      id: query.articleId
     });
   }
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      // editorState: DynamicBraftEditorWithNoSSR.EditorState.createEditorState()
+    };
+  }
+
+  handleEditorChange = (editorState) => {
+    this.setState({ editorState })
   }
 
   onError(e) {
@@ -63,6 +74,10 @@ class DetailUploadedArticle extends React.Component {
   convertPath = path => {
     return path.replace("/", "%2F");
   };
+
+  submitComment = () => {
+    this.props.makeComment(this.state.editorState.toHTML())
+  }
 
   render() {
     return (
@@ -84,7 +99,7 @@ class DetailUploadedArticle extends React.Component {
               bordered
               extra={`Uploaded Date: ${
                 this.props.article.selectedArticle.timestamp
-              }`}
+                }`}
             >
               <DynamicFileViewerWithNoSSR
                 fileType="docx"
@@ -93,32 +108,50 @@ class DetailUploadedArticle extends React.Component {
                 )}?alt=media`}
                 onError={this.onError}
               />
+              <div className="image-container">
+                <Card
+                  type="inner"
+                  title="Images"
+                  bordered
+                  size="small"
+
+                >
+                  <Row>
+                    {this.props.article.selectedArticle.paths.images.map(item => (
+                      <Col xs={24} sm={16} lg={8}>
+                        <img
+                          alt="example"
+                          style={{ width: "100%" }}
+                          src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
+                            item
+                          )}?alt=media`}
+                        />
+                      </Col>
+                    ))}
+                  </Row>
+                </Card>
+              </div>
+
             </Card>
+          </div>
+          <div className="editor">
+            <Card
+              title="Make comment"
+              bordered
+              size="small"
+              extra={<Button type="primary" onClick={this.submitComment}>Save</Button>}
+              style={{ width: '100%' }}
+            >
+              <DynamicBraftEditorWithNoSSR
+                value={this.state.editorState}
+                language="en"
+                onChange={this.handleEditorChange}
+                onSave={this.submitContent}
+              />
+            </Card>
+
           </div>
 
-          <div className="card-container">
-            <Card
-              title="Images"
-              bordered
-              extra={`Uploaded Date: ${
-                this.props.article.selectedArticle.timestamp
-              }`}
-            >
-              <Row>
-                {this.props.article.selectedArticle.paths.images.map(item => (
-                  <Col xs={24} sm={16} lg={8}>
-                    <img
-                      alt="example"
-                      style={{ width: "100%" }}
-                      src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                        item
-                      )}?alt=media`}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </Card>
-          </div>
         </div>
       </AdminLayout>
     );
@@ -131,7 +164,8 @@ const mapState = state => ({
 });
 
 const mapDispatch = ({ userProfile, article }) => ({
-  logoutFirebase: () => userProfile.logoutFirebase()
+  logoutFirebase: () => userProfile.logoutFirebase(),
+  makeComment: (comment) => article.makeComment({ comment })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

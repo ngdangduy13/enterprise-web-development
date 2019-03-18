@@ -16,7 +16,7 @@ import {
   message,
   Select
 } from "antd";
-import "../../static/css/view-article.css";
+import "../../static/css/student/view-article.css";
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import Router from "next/router";

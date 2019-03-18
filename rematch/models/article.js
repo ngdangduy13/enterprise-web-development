@@ -41,11 +41,11 @@ const article = createModel({
       };
     },
     fetchUploadedArticleSuccessfully: (state, payload) => {
-        return {
-          ...state,
-          uploadedArticles: payload
-        };
-      },
+      return {
+        ...state,
+        uploadedArticles: payload
+      };
+    },
     findArticleSuccessfully: (state, payload) => {
       return {
         ...state,
@@ -75,7 +75,7 @@ const article = createModel({
           studentId: rootState.userProfile.uid,
           isPublish: false,
           eventId: payload.eventId,
-          facultyId: rootState.userProfile.facultyId
+          facultyId: rootState.userProfile.facultyId,
         };
         const articleRef = firebase.firestore().collection("articles");
         const resultRef = await articleRef.add(data);
@@ -140,27 +140,48 @@ const article = createModel({
       }
     },
     async fetchUploadedArticles(payload, rootState) {
-        try {
-          this.updateBusyState(true);
-          const querySnapshot = await firebase
-            .firestore()
-            .collection("articles")
-            .where("facultyId", "==", rootState.userProfile.facultyId)
-            .get();
-          const articles = [];
-          querySnapshot.forEach(doc => {
-            articles.push({ ...doc.data(), id: doc.id });
-          });
-          message.success("Fetch articles successfully");
-  
-          this.fetchUploadedArticleSuccessfully(articles);
-        } catch (er) {
-          console.log(er);
-          message.error(er.message);
-        } finally {
-          this.updateBusyState(false);
-        }
+      try {
+        this.updateBusyState(true);
+        const querySnapshot = await firebase
+          .firestore()
+          .collection("articles")
+          .where("facultyId", "==", rootState.userProfile.facultyId)
+          .get();
+        const articles = [];
+        querySnapshot.forEach(doc => {
+          articles.push({ ...doc.data(), id: doc.id });
+        });
+        message.success("Fetch articles successfully");
+
+        this.fetchUploadedArticleSuccessfully(articles);
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
       }
+    },
+    async makeComment(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+        console.log(rootState)
+        const querySnapshot = await firebase
+          .firestore()
+          .collection("articles")
+          .doc(rootState.article.selectedArticle.id)
+          .set({
+            comments: rootState.article.selectedArticle.comments
+              ? [...rootState.article.selectedArticle.comments, { html: payload.comment, timestamp: moment().format("LL") }]
+              : [{ html: payload.comment, timestamp: moment().format("LL") }]
+          }, { merge: true });
+        message.success("Add comment successfully");
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    }
   })
 });
 
