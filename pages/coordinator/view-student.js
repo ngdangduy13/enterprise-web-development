@@ -25,21 +25,18 @@ import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    if (query.students === undefined) {
-      const querySnapshot = await firebase
-        .firestore()
-        .collection("users")
-        .where("facultyId", "==", store.getState().userProfile.facultyId)
-        .where("role", "==", "STUDENT")
-        .get();
-      const students = [];
-      querySnapshot.forEach(doc => {
-        students.push({ ...doc.data(), id: doc.id });
-      });
-      store.dispatch.student.fetchStudentsSuccessfully(students);
-    } else {
-      store.dispatch.student.fetchStudentsSuccessfully(query.students);
-    }
+    const querySnapshot = await firebase
+      .firestore()
+      .collection("users")
+      .where("facultyId", "==", store.getState().userProfile.facultyId)
+      .where("role", "==", "STUDENT")
+      .get();
+    const students = [];
+    querySnapshot.forEach(doc => {
+      students.push({ ...doc.data(), id: doc.id });
+    });
+    store.dispatch.student.fetchStudentsSuccessfully(students);
+
   }
 
   constructor(props) {
@@ -86,7 +83,7 @@ class UploadArticle extends React.Component {
   actionButtons = (text, record) => {
     return (
       <div className="action-buttons">
-        <Tooltip title="Edit User Info">
+        <Tooltip title="Edit user info">
           <Button
             type="primary"
             icon="edit"
@@ -96,9 +93,9 @@ class UploadArticle extends React.Component {
           />
         </Tooltip>
 
-        <Tooltip>
+        <Tooltip title="Actice/Deactive user">
           <Button
-            type="primary"
+            type="danger"
             icon={record.isActive ? "lock" : "unlock"}
             className="button"
             onClick={() => this.props.toggleActiveStudent(record.id)}
@@ -218,8 +215,8 @@ class UploadArticle extends React.Component {
                       name="email"
                       prefix={<Icon type="mail" />}
                       placeholder="Email"
-                      // onChange={e => this.setState({ title: e.target.value })}
-                      // disabled={this.props.currentUser._id ? true : false}
+                    // onChange={e => this.setState({ title: e.target.value })}
+                    // disabled={this.props.currentUser._id ? true : false}
                     />
                   )}
                 </Form.Item>
@@ -238,7 +235,7 @@ class UploadArticle extends React.Component {
                       name="password"
                       type="password"
                       placeholder="Password"
-                      // onChange={e => this.setState({ description: e.target.value })}
+                    // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -260,7 +257,7 @@ class UploadArticle extends React.Component {
                       name="confirmPassword"
                       type="password"
                       placeholder="Confirm Password"
-                      // onChange={e => this.setState({ description: e.target.value })}
+                    // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -277,7 +274,7 @@ class UploadArticle extends React.Component {
                       prefix={<Icon type="profile" />}
                       name="fullname"
                       placeholder="Full name"
-                      // onChange={e => this.setState({ description: e.target.value })}
+                    // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -293,10 +290,10 @@ class UploadArticle extends React.Component {
                   })(
                     <DatePicker
                       style={{ width: "100%" }}
-                      //   prefix={<Icon type="lock" />}
-                      //   name="dob"
-                      //   placeholder="Date of birth"
-                      // onChange={e => this.setState({ description: e.target.value })}
+                    //   prefix={<Icon type="lock" />}
+                    //   name="dob"
+                    //   placeholder="Date of birth"
+                    // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
@@ -313,7 +310,7 @@ class UploadArticle extends React.Component {
                       prefix={<Icon type="shop" />}
                       name="address"
                       placeholder="Address"
-                      // onChange={e => this.setState({ description: e.target.value })}
+                    // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>

@@ -6,8 +6,7 @@ import {
   Row,
   Upload,
   Button,
-  Icon,
-  Tooltip,
+  Collapse,
   Table,
   Modal,
   Form,
@@ -109,28 +108,42 @@ class DetailUploadedArticle extends React.Component {
                 onError={this.onError}
               />
               <div className="image-container">
-                <Card
-                  type="inner"
-                  title="Images"
-                  bordered
-                  size="small"
-
-                >
-                  <Row>
-                    {this.props.article.selectedArticle.paths.images.map(item => (
-                      <Col xs={24} sm={16} lg={8}>
-                        <img
-                          alt="example"
-                          style={{ width: "100%" }}
-                          src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                            item
-                          )}?alt=media`}
-                        />
-                      </Col>
-                    ))}
-                  </Row>
-                </Card>
+                <Collapse accordion>
+                  <Collapse.Panel header="Images" key="1">
+                    <Row>
+                      {this.props.article.selectedArticle.paths.images.map(item => (
+                        <Col xs={24} sm={16} lg={8}>
+                          <img
+                            alt="example"
+                            style={{ width: "100%" }}
+                            src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
+                              item
+                            )}?alt=media`}
+                          />
+                        </Col>
+                      ))}
+                    </Row>
+                  </Collapse.Panel>
+                </Collapse>
               </div>
+              {this.props.article.selectedArticle.comments !== undefined &&
+                <div className="comment-container">
+                  <Collapse accordion>
+                    <Collapse.Panel header="Previous comments" key="2">
+                      {this.props.article.selectedArticle.comments.map(item => (
+                        <Row style={{ borderBottom: '1px solid #ddd', padding: '10px 10px' }}>
+                          <Col xs={8} sm={6} lg={4}>
+                            On <strong>{item.timestamp}</strong> :
+                      </Col>
+                          <Col xs={16} sm={18} lg={20} >
+                            {/* {dangerouslySetInnerHTML item.html} */}
+                            <div dangerouslySetInnerHTML={{ __html: item.html }}></div>
+                          </Col>
+                        </Row>
+                      ))}
+                    </Collapse.Panel>
+                  </Collapse>
+                </div>}
 
             </Card>
           </div>

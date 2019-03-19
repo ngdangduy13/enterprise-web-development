@@ -21,23 +21,20 @@ import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import Router from "next/router";
 import firebase from "../../firebase";
+import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    if (query.articles) {
-      store.dispatch.article.fetchArticleSuccessfully(query.articles);
-    } else {
-      const querySnapshotArticles = await firebase
-        .firestore()
-        .collection("articles")
-        .where("studentId", "==", store.getState().userProfile.uid)
-        .get();
-      const articles = [];
-      querySnapshotArticles.forEach(doc => {
-        articles.push({ ...doc.data(), id: doc.id });
-      });
-      store.dispatch.article.fetchArticleSuccessfully(articles);
-    }
+    const querySnapshotArticles = await firebase
+      .firestore()
+      .collection("articles")
+      .where("studentId", "==", store.getState().userProfile.uid)
+      .get();
+    const articles = [];
+    querySnapshotArticles.forEach(doc => {
+      articles.push({ ...doc.data(), id: doc.id });
+    });
+    store.dispatch.article.fetchArticleSuccessfully(articles);
   }
 
   constructor(props) {
@@ -64,16 +61,27 @@ class UploadArticle extends React.Component {
         const title = this.props.form.getFieldValue("title");
         const description = this.props.form.getFieldValue("description");
         const event = this.props.form.getFieldValue("event");
-        this.props.uploadArticle(
-          title,
-          description,
-          this.state.fileList,
-          event
-        );
-        this.setState({
-          fileList: []
-        });
-        this.props.form.resetFields();
+        const eventIndex = _.findIndex(this.props.event.all, (o) => { return o.id == event });
+        console.log(eventIndex)
+        console.log(this.props.event.all[eventIndex].closureDate, moment())
+        console.log(this.props.event.all[eventIndex].closureDate < moment())
+        if (moment().format('LL') > this.props.event.all[eventIndex].closureDate) {
+          Modal.error({
+            title: 'Submmit Error',
+            content: `This event was closed in ${this.props.event.all[eventIndex].closureDate}`,
+          })
+        } else {
+          this.props.uploadArticle(
+            title,
+            description,
+            this.state.fileList,
+            event
+          );
+          this.setState({
+            fileList: []
+          });
+          this.props.form.resetFields();
+        }
       }
     });
   };
@@ -102,6 +110,7 @@ class UploadArticle extends React.Component {
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const { fileList } = this.state;
+    const eventAvailable = this.props.event.all.filter(i => moment().format("LL") < i.closureDate)
     const propsUpload = {
       onRemove: file => {
         this.setState(state => {
@@ -120,7 +129,7 @@ class UploadArticle extends React.Component {
           file.type === "image/jpg" ||
           file.type === "application/msword" ||
           file.type ===
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         if (isCorrectFileType) {
           this.setState(state => ({
             fileList: [...state.fileList, file]
@@ -242,8 +251,8 @@ class UploadArticle extends React.Component {
                       name="title"
                       prefix={<Icon type="mail" />}
                       placeholder="Title"
-                      // onChange={e => this.setState({ title: e.target.value })}
-                      // disabled={this.props.currentUser._id ? true : false}
+                    // onChange={e => this.setState({ title: e.target.value })}
+                    // disabled={this.props.currentUser._id ? true : false}
                     />
                   )}
                 </Form.Item>
@@ -257,11 +266,11 @@ class UploadArticle extends React.Component {
                       prefix={<Icon type="lock" />}
                       name="description"
                       placeholder="Description"
-                      // onChange={e => this.setState({ description: e.target.value })}
+                    // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
-                <Form.Item label="Events">
+                <Form.Item label="Event">
                   {getFieldDecorator("event", {
                     rules: [
                       {
@@ -273,14 +282,18 @@ class UploadArticle extends React.Component {
                     validateFirst: true
                   })(
                     <Select
+                      prefix={<Icon type="lock" />}
+                      placeholder="Event"
                       disabled={this.props.event.isBusy}
                       style={{ width: "100%" }}
                     >
-                      {this.props.event.all.map(item => (
-                        <Select.Option value={item.id}>
-                          {item.name}
-                        </Select.Option>
-                      ))}
+                      {eventAvailable.map(item => {
+                        return (
+                          <Select.Option value={item.id}>
+                            {item.name}
+                          </Select.Option>
+                        )
+                      })}
                     </Select>
                   )}
                 </Form.Item>
@@ -303,7 +316,7 @@ class UploadArticle extends React.Component {
                           upload
                         </p>
                         <p className="ant-upload-hint">
-                          Only support Word documents.
+                          Only support Word documents and images.
                         </p>
                       </Upload.Dragger>
                     )}

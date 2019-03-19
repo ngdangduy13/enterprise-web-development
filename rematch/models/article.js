@@ -59,7 +59,7 @@ const article = createModel({
         ...state,
         all: newArticles
       };
-    }
+    },
   },
   effects: dispatch => ({
     // handle state changes with impure functions.
@@ -76,6 +76,7 @@ const article = createModel({
           isPublish: false,
           eventId: payload.eventId,
           facultyId: rootState.userProfile.facultyId,
+          status: 'Unpublish'
         };
         const articleRef = firebase.firestore().collection("articles");
         const resultRef = await articleRef.add(data);
@@ -164,17 +165,42 @@ const article = createModel({
     async makeComment(payload, rootState) {
       try {
         this.updateBusyState(true);
-        console.log(rootState)
         const querySnapshot = await firebase
           .firestore()
           .collection("articles")
           .doc(rootState.article.selectedArticle.id)
           .set({
+            status: 'Processing',
             comments: rootState.article.selectedArticle.comments
               ? [...rootState.article.selectedArticle.comments, { html: payload.comment, timestamp: moment().format("LL") }]
               : [{ html: payload.comment, timestamp: moment().format("LL") }]
           }, { merge: true });
         message.success("Add comment successfully");
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    },
+    async publishArticle(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+        const querySnapshot = await firebase
+          .firestore()
+          .collection("articles")
+          .doc(payload.id)
+          .set({
+            status: 'Published',
+          }, { merge: true });
+        const newList = rootState.article.uploadedArticles.map(i => {
+          if (i.id === payload.id) {
+            return { ...i, status: 'Published' };
+          }
+          return { ...i };
+        });
+        this.fetchUploadedArticleSuccessfully(newList)
+        message.success("Publish article successfully");
       } catch (er) {
         console.log(er);
         message.error(er.message);

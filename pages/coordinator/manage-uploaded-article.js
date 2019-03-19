@@ -12,7 +12,6 @@ import {
   Modal,
   Form,
   Tag,
-  Checkbox,
   message,
   Select
 } from "antd";
@@ -23,20 +22,28 @@ import firebase from "../../firebase";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    if (query.articles) {
-      store.dispatch.article.fetchUploadedArticleSuccessfully(query.articles);
-    } else {
-      const querySnapshotArticles = await firebase
-        .firestore()
-        .collection("articles")
-        .where("facultyId", "==", store.getState().userProfile.facultyId)
-        .get();
-      const articles = [];
-      querySnapshotArticles.forEach(doc => {
-        articles.push({ ...doc.data(), id: doc.id });
-      });
-      store.dispatch.article.fetchUploadedArticleSuccessfully(articles);
-    }
+
+    const querySnapshotArticles = await firebase
+      .firestore()
+      .collection("articles")
+      .where("facultyId", "==", store.getState().userProfile.facultyId)
+      .get();
+    const articles = [];
+    querySnapshotArticles.forEach(doc => {
+      articles.push({ ...doc.data(), id: doc.id });
+    });
+    store.dispatch.article.fetchUploadedArticleSuccessfully(articles);
+
+    const querySnapshotEvents = await firebase
+      .firestore()
+      .collection("events")
+      .where("facultyId", "==", store.getState().userProfile.facultyId)
+      .get();
+    const events = [];
+    querySnapshotEvents.forEach(doc => {
+      events.push({ ...doc.data(), id: doc.id });
+    });
+    store.dispatch.event.fetchEventsSuccessfully(events);
   }
 
   constructor(props) {
@@ -58,17 +65,67 @@ class UploadArticle extends React.Component {
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
+        <Tooltip title={"Publish the article"}>
+          <Button
+            type="primary"
+            icon="global"
+            className="button"
+            onClick={() =>
+              Modal.confirm({
+                title: 'Do you want to publish this article?',
+                content: 'Warning: This action cannot be taken back, please consider before submitting',
+                onOk: () => {
+                  this.props.publishArticle(record.id)
+                }
+              })
+            }
+            style={{ marginRight: "12px" }}
+          />
+        </Tooltip>
       </div>
     );
   };
 
+  renderEvent = (text, record) => {
+    const event = this.props.event.all.filter(i => i.id === record.eventId)
+    return (
+      <span>{event[0].name}</span>
+    )
+  }
+
+  renderStatus = (text, record, index) => {
+    let color;
+    if (record.status === 'Unpublish') {
+      color = 'red'
+    } else if (record.status === 'Processing') {
+      color = 'cyan'
+    } else if (record.status === 'Published') {
+      color = 'green'
+    }
+    return (
+      <span>
+        <Tag color={color} key={index}>
+          {record.status}
+        </Tag>
+      </span>
+    )
+  }
+
   render() {
+    console.log(this.props.article)
     const columns = [
       {
         title: "Title",
         dataIndex: "title",
         key: "title",
         sorter: true
+      },
+      {
+        title: "Event",
+        dataIndex: "event",
+        key: "event",
+        sorter: true,
+        render: this.renderEvent
       },
       {
         title: "Uploaded Date",
@@ -84,16 +141,10 @@ class UploadArticle extends React.Component {
       },
       {
         title: "Status",
-        dataIndex: "isPublish",
-        key: "isPublish",
+        dataIndex: "status",
+        key: "tstus",
         width: "12%",
-        render: (isPublish, index) => (
-          <span>
-            <Tag color={isPublish ? "green" : "orange"} key={index}>
-              {isPublish ? "Published" : "Unpublish"}
-            </Tag>
-          </span>
-        )
+        render: this.renderStatus
       },
       {
         title: "Actions",
@@ -131,15 +182,6 @@ class UploadArticle extends React.Component {
               columns={columns}
               dataSource={this.props.article.uploadedArticles}
               rowKey={record => record._id}
-              //   onRow={(record, rowIndex) => {
-              //     return {
-              //       onClick: event => {
-              //         Router.push(
-              //           `/student/detail-article?articleId=${record.id}`
-              //         );
-              //       } // click row
-              //     };
-              //   }}
             />
           </div>
         </div>
@@ -150,12 +192,14 @@ class UploadArticle extends React.Component {
 
 const mapState = state => ({
   userProfile: state.userProfile,
-  article: state.article
+  article: state.article,
+  event: state.event
 });
 
 const mapDispatch = ({ userProfile, article, event }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
-  fetchUploadedArticles: () => article.fetchUploadedArticles()
+  fetchUploadedArticles: () => article.fetchUploadedArticles(),
+  publishArticle: (id) => article.publishArticle({id})
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

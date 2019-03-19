@@ -4,7 +4,6 @@ import firebase from "../../firebase";
 import Router from "next/router";
 import moment from "moment";
 import _ from "lodash";
-import { root } from "postcss";
 
 const initialState = {
   all: [],
@@ -62,7 +61,8 @@ const event = createModel({
           finalClosureDate: payload.finalClosureDate,
           name: payload.name,
           facultyId: rootState.userProfile.facultyId,
-          description: payload.description !== undefined ? payload.description : ''
+          description: payload.description !== undefined ? payload.description : '',
+          timestamp: moment().format("LL")
         };
 
         const eventRef = firebase.firestore().collection("events");

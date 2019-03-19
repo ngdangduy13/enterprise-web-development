@@ -31,17 +31,7 @@ const setupPublicRoutes = (server, app) => {
     "/student/view-article",
     authorize("STUDENT"),
     async (req, res) => {
-      const querySnapshot = await admin
-        .firestore()
-        .collection("articles")
-        .where("studentId", "==", req.query.profile.uid)
-        .get();
-      const articles = [];
-      querySnapshot.forEach(doc => {
-        articles.push({ ...doc.data(), id: doc.id });
-      });
       app.render(req, res, "/student/view-article", {
-        articles,
         ...req.query
       });
     }
@@ -51,47 +41,14 @@ const setupPublicRoutes = (server, app) => {
     "/student/detail-article/",
     authorize("STUDENT"),
     async (req, res) => {
-      const userRef = await admin
-        .firestore()
-        .collection("articles")
-        .doc(req.query.articleId)
-        .get();
-      const paths = {
-        document: [],
-        images: []
-      };
-      for (const path of userRef.data().paths) {
-        const downloadUrl = await admin
-          .storage()
-          .bucket()
-          .file(path)
-          .getSignedUrl();
-        // if (path.split(".")[1] === "doc" || path.split(".")[1] === "docx") {
-        //   paths.document.push(downloadUrl);
-        // } else {
-        //   paths.images.push(downloadUrl);
-        // }
-      }
       app.render(req, res, "/student/detail-article", {
-        selectedArticle: { ...userRef.data(), paths },
         ...req.query
       });
     }
   );
 
   server.get("/coord/view-student", authorize("COORD"), async (req, res) => {
-    const querySnapshot = await admin
-      .firestore()
-      .collection("users")
-      .where("facultyId", "==", req.query.profile.facultyId)
-      .where("role", "==", "STUDENT")
-      .get();
-    const students = [];
-    querySnapshot.forEach(doc => {
-      students.push({ ...doc.data(), id: doc.id });
-    });
     app.render(req, res, "/coordinator/view-student", {
-      students,
       ...req.query
     });
   });
@@ -100,17 +57,8 @@ const setupPublicRoutes = (server, app) => {
     "/coord/manage-uploaded-article",
     authorize("COORD"),
     async (req, res) => {
-      const querySnapshot = await admin
-        .firestore()
-        .collection("articles")
-        .where("facultyId", "==", req.query.profile.facultyId)
-        .get();
-      const articles = [];
-      querySnapshot.forEach(doc => {
-        articles.push({ ...doc.data(), id: doc.id });
-      });
       app.render(req, res, "/coordinator/manage-uploaded-article", {
-        articles,
+        // articles,
         ...req.query
       });
     }
