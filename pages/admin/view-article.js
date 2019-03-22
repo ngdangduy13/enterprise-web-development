@@ -12,104 +12,75 @@ import {
   Modal,
   Form,
   Tag,
+  Checkbox,
   message,
   Select
 } from "antd";
+import "../../static/css/student/view-article.css";
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import Router from "next/router";
 import firebase from "../../firebase";
+import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-
     const querySnapshotArticles = await firebase
       .firestore()
       .collection("articles")
-      .where("facultyId", "==", store.getState().userProfile.facultyId)
       .get();
     const articles = [];
     querySnapshotArticles.forEach(doc => {
       articles.push({ ...doc.data(), id: doc.id });
     });
-    store.dispatch.article.fetchUploadedArticleSuccessfully(articles);
-
-    const querySnapshotEvents = await firebase
-      .firestore()
-      .collection("events")
-      .where("facultyId", "==", store.getState().userProfile.facultyId)
-      .get();
-    const events = [];
-    querySnapshotEvents.forEach(doc => {
-      events.push({ ...doc.data(), id: doc.id });
-    });
-    store.dispatch.event.fetchEventsSuccessfully(events);
+    store.dispatch.article.fetchArticleSuccessfully(articles);
   }
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      isVisible: false,
+      fileList: []
+    };
   }
 
-  actionButtons = (text, record) => {
+  toggleUploadArticle = () => {
+    if (!this.state.isVisible) {
+      this.props.fetchEvents();
+    }
+    this.setState({
+      isVisible: !this.state.isVisible
+    });
+  };
+
+  actionButtons = (text, record, index) => {
     return (
       <div className="action-buttons">
-        <Tooltip title={"View details and make comment"}>
+        <Tooltip title={"View details"}>
           <Button
             type="primary"
             icon="info-circle"
             className="button"
             onClick={() =>
-              Router.push(`/coord/detail-uploaded-article?articleId=${record.id}`)
+              Router.push(`/student/detail-article?articleId=${record.id}`)
             }
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
-        <Tooltip title={"Publish the article"}>
+        <Tooltip title={"Download article"}>
           <Button
             type="primary"
-            icon="global"
+            icon="download"
             className="button"
-            onClick={() =>
-              Modal.confirm({
-                title: 'Do you want to publish this article?',
-                content: 'Warning: This action cannot be taken back, please consider before submitting',
-                onOk: () => {
-                  this.props.publishArticle(record.id)
-                }
-              })
-            }
+            onClick={() => {
+              this.props.downloadArticle(index);
+            }}
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
       </div>
     );
   };
-
-  renderEvent = (text, record) => {
-    const event = this.props.event.all.filter(i => i.id === record.eventId)
-    return (
-      <span>{event[0].name}</span>
-    )
-  }
-
-  renderStatus = (text, record, index) => {
-    let color;
-    if (record.status === 'Unpublish') {
-      color = 'red'
-    } else if (record.status === 'Processing') {
-      color = 'orange'
-    } else if (record.status === 'Published') {
-      color = 'green'
-    }
-    return (
-      <span>
-        <Tag color={color} key={index}>
-          {record.status}
-        </Tag>
-      </span>
-    )
-  }
 
   render() {
     const columns = [
@@ -118,13 +89,6 @@ class UploadArticle extends React.Component {
         dataIndex: "title",
         key: "title",
         sorter: true
-      },
-      {
-        title: "Event",
-        dataIndex: "event",
-        key: "event",
-        sorter: true,
-        render: this.renderEvent
       },
       {
         title: "Uploaded Date",
@@ -140,17 +104,23 @@ class UploadArticle extends React.Component {
       },
       {
         title: "Status",
-        dataIndex: "status",
-        key: "tstus",
+        dataIndex: "isPublish",
+        key: "isPublish",
         width: "12%",
-        render: this.renderStatus
+        render: (isPublish, index) => (
+          <span>
+            <Tag color={isPublish ? "green" : "orange"} key={index}>
+              {isPublish ? "Published" : "Unpublish"}
+            </Tag>
+          </span>
+        )
       },
       {
         title: "Actions",
         dataIndex: "actions",
         key: "actions",
-        width: "11%",
-        render: this.actionButtons
+        render: this.actionButtons,
+        width: "11%"
       }
     ];
     return (
@@ -158,7 +128,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Coordinator", "Event", "Manage uploaded articles"]}
+        breadcrumb={["Student", "Article", "View"]}
       >
         <div className="container">
           <Row>
@@ -166,7 +136,7 @@ class UploadArticle extends React.Component {
               <div className="refresh">
                 <Button
                   type="primary"
-                  onClick={this.props.fetchUploadedArticles}
+                  onClick={this.props.fetchAllArticles}
                   loading={this.props.article.isBusy}
                   icon="sync"
                 >
@@ -180,7 +150,7 @@ class UploadArticle extends React.Component {
               size="middle"
               loading={this.props.article.isBusy}
               columns={columns}
-              dataSource={this.props.article.uploadedArticles}
+              dataSource={this.props.article.all}
               rowKey={record => record.id}
             />
           </div>
@@ -197,9 +167,15 @@ const mapState = state => ({
 });
 
 const mapDispatch = ({ userProfile, article, event }) => ({
+  loginFirebase: (email, password) =>
+    userProfile.loginFirebase({ email, password }),
   logoutFirebase: () => userProfile.logoutFirebase(),
-  fetchUploadedArticles: () => article.fetchUploadedArticles(),
-  publishArticle: (id) => article.publishArticle({id})
+  fetchAllArticles: () => article.fetchAllArticles(),
+  downloadArticle: (index) => article.downloadArticle({index}),
+  uploadArticle: (title, description, files, eventId) =>
+    article.uploadArticle({ title, description, files, eventId }),
+  deleteArticle: id => article.deleteArticle({ id }),
+  fetchEvents: () => event.fetchEvents()
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

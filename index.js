@@ -9,10 +9,7 @@ const bootstrap = async () => {
     const port = parseInt(process.env.PORT ? process.env.PORT : '', 10) || 3000;
     const server = express();
     // Middleware
-    server.use(cors({
-        origin:  /.*\.localhost:3000$/,
-        credentials: true,
-    }));
+    server.use(cors());
     server.use(bodyParser.urlencoded({ extended: true, limit: '20mb' }));
     server.use(bodyParser.json());
     server.use(cookieParser());

@@ -50,7 +50,7 @@ class AdminLayout extends React.Component {
 
             <Layout.Content style={{ margin: '0 16px' }}>
               <Breadcrumb style={{ margin: '16px 0' }}>
-                {this.props.breadcrumb.map(item => <Breadcrumb.Item>{item}</Breadcrumb.Item>)}
+                {this.props.breadcrumb.map(item => <Breadcrumb.Item key={item}>{item}</Breadcrumb.Item>)}
               </Breadcrumb>
               {this.props.children}
             </Layout.Content>

@@ -25,20 +25,16 @@ import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-    if (query.events === undefined) {
-      const querySnapshot = await firebase
-        .firestore()
-        .collection("events")
-        .where("facultyId", "==", store.getState().userProfile.facultyId)
-        .get();
-      const events = [];
-      querySnapshot.forEach(doc => {
-        events.push({ ...doc.data(), id: doc.id });
-      });
-      store.dispatch.event.fetchEventsSuccessfully(events);
-    } else {
-      store.dispatch.event.fetchEventsSuccessfully(query.events);
-    }
+    const querySnapshot = await firebase
+      .firestore()
+      .collection("events")
+      .where("facultyId", "==", store.getState().userProfile.facultyId)
+      .get();
+    const events = [];
+    querySnapshot.forEach(doc => {
+      events.push({ ...doc.data(), id: doc.id });
+    });
+    store.dispatch.event.fetchEventsSuccessfully(events);
   }
 
   constructor(props) {
@@ -53,7 +49,6 @@ class UploadArticle extends React.Component {
       isVisible: !this.state.isVisible
     });
   };
-
 
   addEvent = e => {
     e.preventDefault();
@@ -178,7 +173,7 @@ class UploadArticle extends React.Component {
               loading={this.props.event.isBusy}
               columns={columns}
               dataSource={this.props.event.all}
-              rowKey={record => record._id}
+              rowKey={record => record.id}
             />
           </div>
           <Modal

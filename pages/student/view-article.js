@@ -62,9 +62,6 @@ class UploadArticle extends React.Component {
         const description = this.props.form.getFieldValue("description");
         const event = this.props.form.getFieldValue("event");
         const eventIndex = _.findIndex(this.props.event.all, (o) => { return o.id == event });
-        console.log(eventIndex)
-        console.log(this.props.event.all[eventIndex].closureDate, moment())
-        console.log(this.props.event.all[eventIndex].closureDate < moment())
         if (moment().format('LL') > this.props.event.all[eventIndex].closureDate) {
           Modal.error({
             title: 'Submmit Error',
@@ -184,6 +181,7 @@ class UploadArticle extends React.Component {
         title: "Actions",
         dataIndex: "actions",
         key: "actions",
+        width: "11%",
         render: this.actionButtons
       }
     ];
@@ -220,7 +218,7 @@ class UploadArticle extends React.Component {
               loading={this.props.article.isBusy}
               columns={columns}
               dataSource={this.props.article.all}
-              rowKey={record => record._id}
+              rowKey={record => record.id}
             />
           </div>
           <Modal

@@ -4,7 +4,7 @@ import {
   Row,
   Col,
   Input,
-  Upload,
+  Select,
   Button,
   Icon,
   Tooltip,
@@ -28,14 +28,12 @@ class UploadArticle extends React.Component {
     const querySnapshot = await firebase
       .firestore()
       .collection("users")
-      .where("facultyId", "==", store.getState().userProfile.facultyId)
-      .where("role", "==", "STUDENT")
       .get();
-    const students = [];
+    const users = [];
     querySnapshot.forEach(doc => {
-      students.push({ ...doc.data(), id: doc.id });
+      users.push({ ...doc.data(), id: doc.id });
     });
-    store.dispatch.student.fetchStudentsSuccessfully(students);
+    store.dispatch.user.fetchUsersSuccessfully(users);
   }
 
   constructor(props) {
@@ -45,13 +43,13 @@ class UploadArticle extends React.Component {
     };
   }
 
-  toggleAddStudent = () => {
+  toggleAddUser = () => {
     this.setState({
       isVisible: !this.state.isVisible
     });
   };
 
-  addStudent = e => {
+  addUser = e => {
     e.preventDefault();
     this.props.form.validateFields(async (error, _values) => {
       if (!error) {
@@ -60,7 +58,9 @@ class UploadArticle extends React.Component {
         const dob = moment(this.props.form.getFieldValue("dob")).format("LL");
         const address = this.props.form.getFieldValue("address");
         const fullname = this.props.form.getFieldValue("fullname");
-        this.props.addStudent(email, password, address, dob, fullname);
+        const role = this.props.form.getFieldValue("role");
+        const facultyId = this.props.form.getFieldValue("facultyId");
+        this.props.addUser(email, password, address, dob, fullname, role, facultyId);
         this.props.form.resetFields();
       }
     });
@@ -97,7 +97,7 @@ class UploadArticle extends React.Component {
             type="danger"
             icon={record.isActive ? "lock" : "unlock"}
             className="button"
-            onClick={() => this.props.toggleActiveStudent(record.id)}
+            onClick={() => this.props.toggleActiveUser(record.id)}
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
@@ -107,6 +107,21 @@ class UploadArticle extends React.Component {
 
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
+    const role = this.props.form.getFieldValue("role");
+    const roles = [
+      {
+        id: "ADMIN",
+        name: "Admin"
+      },
+      {
+        id: "COORD",
+        name: "Coordinator"
+      },
+      {
+        id: "STUDENT",
+        name: "Student"
+      }
+    ];
     const columns = [
       {
         title: "Email",
@@ -119,6 +134,13 @@ class UploadArticle extends React.Component {
         dataIndex: "fullname",
         key: "fullname",
         width: "20%"
+        // sorter: true,
+      },
+      {
+        title: "Role",
+        dataIndex: "role",
+        key: "role",
+        width: "10%"
         // sorter: true,
       },
       {
@@ -135,7 +157,6 @@ class UploadArticle extends React.Component {
         title: "Status",
         dataIndex: "isActive",
         key: "isActive",
-        width: "12%",
         render: (isActive, index) => (
           <span>
             <Tag color={isActive ? "green" : "red"} key={index}>
@@ -148,6 +169,7 @@ class UploadArticle extends React.Component {
         title: "Actions",
         dataIndex: "isActive",
         key: "actions",
+        width: "11%",
         render: this.actionButtons
       }
     ];
@@ -156,22 +178,22 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Coordinator", "Student", "View"]}
+        breadcrumb={["Admin", "Users", "View"]}
       >
         <div className="container">
           <Row>
             <Col span={24} className="button-flex">
               <div className="add">
-                <Button type="primary" onClick={this.toggleAddStudent}>
-                  <Icon type="plus" /> Add New Student
+                <Button type="primary" onClick={this.toggleAddUser}>
+                  <Icon type="plus" /> Add New Users
                 </Button>
               </div>
               <div className="refresh">
                 <Button
                   type="primary"
                   icon="sync"
-                  onClick={this.props.fetchStudents}
-                  loading={this.props.student.isBusy}
+                  onClick={this.props.fetchUsers}
+                  loading={this.props.user.isBusy}
                 >
                   Refresh
                 </Button>
@@ -181,20 +203,20 @@ class UploadArticle extends React.Component {
           <div className="users-table">
             <Table
               size="middle"
-              loading={this.props.student.isBusy}
+              loading={this.props.user.isBusy}
               columns={columns}
-              dataSource={this.props.student.all}
+              dataSource={this.props.user.all}
               rowKey={record => record.id}
             />
           </div>
           <Modal
-            title="Add Student"
+            title="Add User"
             visible={this.state.isVisible}
-            confirmLoading={this.props.student.isBusy}
+            confirmLoading={this.props.user.isBusy}
             okText="Save"
             cancelText="Cancel"
-            onOk={this.addStudent}
-            onCancel={this.toggleAddStudent}
+            onOk={this.addUser}
+            onCancel={this.toggleAddUser}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
             }}
@@ -264,6 +286,68 @@ class UploadArticle extends React.Component {
                     />
                   )}
                 </Form.Item>
+                <Form.Item label="Role">
+                  {getFieldDecorator("role", {
+                    rules: [
+                      {
+                        required: true,
+                        message: "Please choose role before submitting"
+                      }
+                    ],
+                    validateTrigger: "onBlur",
+                    validateFirst: true
+                  })(
+                    <Select
+                      prefix={<Icon type="lock" />}
+                      placeholder="Role"
+                      style={{ width: "100%" }}
+                      onSelect={value => {
+                        if (value === "COORD" || value === "STUDENT") {
+                          if (this.props.faculty.all.length === 0) {
+                            this.props.fetchFaculties();
+                          }
+                        }
+                      }}
+                    >
+                      {roles.map(item => {
+                        return (
+                          <Select.Option value={item.id}>
+                            {item.name}
+                          </Select.Option>
+                        );
+                      })}
+                    </Select>
+                  )}
+                </Form.Item>
+                {(role === "COORD" || role === "STUDENT") && (
+                  <Form.Item label="Faculty">
+                    {getFieldDecorator("faculty", {
+                      rules: [
+                        {
+                          required: true,
+                          message: "Please choose faculty before submitting"
+                        }
+                      ],
+                      validateTrigger: "onBlur",
+                      validateFirst: true
+                    })(
+                      <Select
+                        prefix={<Icon type="lock" />}
+                        placeholder="Role"
+                        style={{ width: "100%" }}
+                        disabled={this.props.faculty.isBusy}
+                      >
+                        {this.props.faculty.all.map(item => {
+                          return (
+                            <Select.Option value={item.id}>
+                              {item.name}
+                            </Select.Option>
+                          );
+                        })}
+                      </Select>
+                    )}
+                  </Form.Item>
+                )}
                 <Form.Item label="Full name" hasFeedback>
                   {getFieldDecorator("fullname", {
                     rules: [
@@ -328,17 +412,19 @@ class UploadArticle extends React.Component {
 
 const mapState = state => ({
   userProfile: state.userProfile,
-  student: state.student
+  user: state.user,
+  faculty: state.faculty
 });
 
-const mapDispatch = ({ userProfile, student }) => ({
+const mapDispatch = ({ userProfile, user, faculty }) => ({
   loginFirebase: (email, password) =>
     userProfile.loginFirebase({ email, password }),
   logoutFirebase: () => userProfile.logoutFirebase(),
-  fetchStudents: () => student.fetchStudents(),
-  toggleActiveStudent: id => student.toggleActiveStudent({ id }),
-  addStudent: (email, password, address, dob, fullname) =>
-    student.addStudent({ email, password, address, dob, fullname })
+  fetchUsers: () => user.fetchUsers(),
+  fetchFaculties: () => faculty.fetchFaculties(),
+  toggleActiveUser: id => user.toggleActiveUser({ id }),
+  addUser: (email, password, address, dob, fullname, role, facultyId) =>
+    user.addUser({ email, password, address, dob, fullname, role, facultyId })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

@@ -1,16 +1,16 @@
 import { createModel } from "@rematch/core";
 import { message } from "antd";
 import firebase from "../../firebase";
-import Router from "next/router";
-import moment from "moment";
 import _ from "lodash";
+import moment from "moment";
+
 
 const initialState = {
   all: [],
   isBusy: false
 };
 
-const event = createModel({
+const student = createModel({
   state: {
     all: [],
     isBusy: false
@@ -22,7 +22,7 @@ const event = createModel({
         isBusy: payload
       };
     },
-    fetchEventsSuccessfully: (state, payload) => {
+    fetchFacultiesSuccessfully: (state, payload) => {
       return {
         ...state,
         all: payload
@@ -30,21 +30,19 @@ const event = createModel({
     }
   },
   effects: dispatch => ({
-    async fetchEvents(payload, rootState) {
+    async fetchFaculties(payload, rootState) {
       try {
         this.updateBusyState(true);
         const querySnapshot = await firebase
           .firestore()
-          .collection("events")
-          .where("facultyId", "==", rootState.userProfile.facultyId)
+          .collection("faculties")
           .get();
-        const events = [];
+        const faculties = [];
         querySnapshot.forEach(doc => {
-          events.push({ ...doc.data(), id: doc.id });
+          faculties.push({ ...doc.data(), id: doc.id });
         });
-        message.success("Fetch events successfully");
 
-        this.fetchEventsSuccessfully(events);
+        this.fetchFacultiesSuccessfully(faculties);
       } catch (er) {
         console.log(er);
         message.error(er.message);
@@ -52,22 +50,20 @@ const event = createModel({
         this.updateBusyState(false);
       }
     },
-    async addEvent(payload, rootState) {
+    async addFaculty(payload, rootState) {
       try {
         this.updateBusyState(true);
         const data = {
-          closureDate: payload.closureDate,
-          finalClosureDate: payload.finalClosureDate,
           name: payload.name,
-          facultyId: rootState.userProfile.facultyId,
-          description: payload.description !== undefined ? payload.description : '',
-          timestamp: moment().format("LL")
+          address: payload.address,
+
+          createdDate: moment().format("LL")
         };
 
-        const eventRef = firebase.firestore().collection("events");
+        const eventRef = firebase.firestore().collection("faculties");
         const resultRef = await eventRef.add(data);
 
-        message.success("Add event successfully");
+        message.success("Add faculty successfully");
       } catch (er) {
         console.log(er);
         message.error(er.message);
@@ -78,4 +74,4 @@ const event = createModel({
   })
 });
 
-export default event;
+export default student;

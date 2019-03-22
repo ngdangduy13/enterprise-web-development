@@ -36,21 +36,8 @@ class DetailUploadedArticle extends React.Component {
       .collection("articles")
       .doc(query.articleId)
       .get();
-    const paths = {
-      document: [],
-      images: []
-    };
-
-    for (const path of userRef.data().paths) {
-      if (path.split(".")[1] === "doc" || path.split(".")[1] === "docx") {
-        paths.document.push(path);
-      } else {
-        paths.images.push(path);
-      }
-    }
     store.dispatch.article.findArticleSuccessfully({
       ...userRef.data(),
-      paths,
       id: query.articleId
     });
   }
@@ -71,7 +58,7 @@ class DetailUploadedArticle extends React.Component {
   }
 
   convertPath = path => {
-    return path.replace("/", "%2F");
+    return path.replace(/\//g, "%2F");
   };
 
   submitComment = () => {
@@ -133,7 +120,7 @@ class DetailUploadedArticle extends React.Component {
                       {this.props.article.selectedArticle.comments.map(item => (
                         <Row style={{ borderBottom: '1px solid #ddd', padding: '10px 10px' }}>
                           <Col xs={8} sm={6} lg={4}>
-                            On <strong>{item.timestamp}</strong> :
+                            In <strong>{item.timestamp}</strong> :
                       </Col>
                           <Col xs={16} sm={18} lg={20} >
                             {/* {dangerouslySetInnerHTML item.html} */}

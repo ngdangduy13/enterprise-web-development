@@ -6,6 +6,18 @@ import sidebarItems from "../../../nextjs/constants/sidebar-items";
 
 class Sidebar extends React.Component {
   renderSubmenu = submenu => {
+    if (!submenu.isExpandable) {
+      return (
+        <Menu.Item key={`${submenu.key}`} className="submenu-item">
+          <Link href={submenu.path}>
+            <span>
+              <Icon type={submenu.icon} />
+              <span>{submenu.title}</span>
+            </span>
+          </Link>
+        </Menu.Item>
+      );
+    }
     return (
       <Menu.SubMenu
         key={submenu.key}
@@ -53,7 +65,7 @@ class Sidebar extends React.Component {
             this.renderSubmenu(submenu)
           )}
       </Menu>
-      // </div> 
+      // </div>
     );
   }
 }

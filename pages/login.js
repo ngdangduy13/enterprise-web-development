@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Row, Col, Form, Input, Icon, Checkbox, Button } from "antd";
-import { connect } from "react-redux";
 import "../static/css/login.css";
 import withRematch from "../rematch/withRematch";
 import initStore from "../rematch/store";
@@ -94,7 +93,7 @@ class LoginPage extends React.Component {
                     valuePropName: "checked"
                   })(
                     <Checkbox className="login-form-checkbox">
-                      Remember Me !
+                      Remember Me
                     </Checkbox>
                   )}
                   <a className="login-form-forgot" href="">
