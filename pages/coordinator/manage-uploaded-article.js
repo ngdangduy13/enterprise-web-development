@@ -158,7 +158,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Coordinator", "Event", "Manage uploaded articles"]}
+        breadcrumb={["Coordinator", "Uploaded articles"]}
       >
         <div className="container">
           <Row>

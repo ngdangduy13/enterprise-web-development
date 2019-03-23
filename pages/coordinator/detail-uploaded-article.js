@@ -15,7 +15,7 @@ import {
   message
 } from "antd";
 import "../../static/css/coord/detail-article.css";
-import 'braft-editor/dist/index.css';
+import "braft-editor/dist/index.css";
 
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
@@ -49,9 +49,9 @@ class DetailUploadedArticle extends React.Component {
     };
   }
 
-  handleEditorChange = (editorState) => {
-    this.setState({ editorState })
-  }
+  handleEditorChange = editorState => {
+    this.setState({ editorState });
+  };
 
   onError(e) {
     console.log(e, "error in file-viewer");
@@ -62,8 +62,8 @@ class DetailUploadedArticle extends React.Component {
   };
 
   submitComment = () => {
-    this.props.makeComment(this.state.editorState.toHTML())
-  }
+    this.props.makeComment(this.state.editorState.toHTML());
+  };
 
   render() {
     return (
@@ -73,8 +73,7 @@ class DetailUploadedArticle extends React.Component {
         role={this.props.userProfile.role}
         breadcrumb={[
           "Coordinator",
-          "Event",
-          "Manage uploaded articles",
+          "Uploaded articles",
           "Detail"
         ]}
       >
@@ -85,53 +84,63 @@ class DetailUploadedArticle extends React.Component {
               bordered
               extra={`Uploaded Date: ${
                 this.props.article.selectedArticle.timestamp
-                }`}
+              }`}
             >
               <DynamicFileViewerWithNoSSR
                 fileType="docx"
-                filePath={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                  this.props.article.selectedArticle.paths.document[0]
-                )}?alt=media`}
+                filePath={`../../${
+                  this.props.article.selectedArticle.paths.documents[0]
+                }`}
                 onError={this.onError}
               />
               <div className="image-container">
                 <Collapse accordion>
                   <Collapse.Panel header="Images" key="1">
                     <Row>
-                      {this.props.article.selectedArticle.paths.images.map(item => (
-                        <Col xs={24} sm={16} lg={8}>
-                          <img
-                            alt="example"
-                            style={{ width: "100%" }}
-                            src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                              item
-                            )}?alt=media`}
-                          />
-                        </Col>
-                      ))}
+                      {this.props.article.selectedArticle.paths.images.map(
+                        item => (
+                          <Col xs={24} sm={16} lg={8}>
+                            <img
+                              alt="example"
+                              style={{ width: "100%" }}
+                              src={`/${
+                                this.props.article.selectedArticle.paths
+                                  .images[0]
+                              }`}
+                            />
+                          </Col>
+                        )
+                      )}
                     </Row>
                   </Collapse.Panel>
                 </Collapse>
               </div>
-              {this.props.article.selectedArticle.comments !== undefined &&
+              {this.props.article.selectedArticle.comments !== undefined && (
                 <div className="comment-container">
                   <Collapse accordion>
                     <Collapse.Panel header="Previous comments" key="2">
                       {this.props.article.selectedArticle.comments.map(item => (
-                        <Row style={{ borderBottom: '1px solid #ddd', padding: '10px 10px' }}>
+                        <Row
+                          style={{
+                            borderBottom: "1px solid #ddd",
+                            padding: "10px 10px"
+                          }}
+                        >
                           <Col xs={8} sm={6} lg={4}>
                             In <strong>{item.timestamp}</strong> :
-                      </Col>
-                          <Col xs={16} sm={18} lg={20} >
+                          </Col>
+                          <Col xs={16} sm={18} lg={20}>
                             {/* {dangerouslySetInnerHTML item.html} */}
-                            <div dangerouslySetInnerHTML={{ __html: item.html }}></div>
+                            <div
+                              dangerouslySetInnerHTML={{ __html: item.html }}
+                            />
                           </Col>
                         </Row>
                       ))}
                     </Collapse.Panel>
                   </Collapse>
-                </div>}
-
+                </div>
+              )}
             </Card>
           </div>
           <div className="editor">
@@ -139,8 +148,12 @@ class DetailUploadedArticle extends React.Component {
               title="Make comment"
               bordered
               size="small"
-              extra={<Button type="primary" onClick={this.submitComment}>Save</Button>}
-              style={{ width: '100%' }}
+              extra={
+                <Button type="primary" onClick={this.submitComment}>
+                  Save
+                </Button>
+              }
+              style={{ width: "100%" }}
             >
               <DynamicBraftEditorWithNoSSR
                 value={this.state.editorState}
@@ -149,9 +162,7 @@ class DetailUploadedArticle extends React.Component {
                 onSave={this.submitContent}
               />
             </Card>
-
           </div>
-
         </div>
       </AdminLayout>
     );
@@ -165,7 +176,7 @@ const mapState = state => ({
 
 const mapDispatch = ({ userProfile, article }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
-  makeComment: (comment) => article.makeComment({ comment })
+  makeComment: comment => article.makeComment({ comment })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

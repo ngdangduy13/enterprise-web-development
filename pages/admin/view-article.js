@@ -73,7 +73,7 @@ class UploadArticle extends React.Component {
             icon="download"
             className="button"
             onClick={() => {
-              this.props.downloadArticle(index);
+              this.props.downloadArticle(record.id);
             }}
             style={{ marginRight: "12px" }}
           />
@@ -128,7 +128,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Student", "Article", "View"]}
+        breadcrumb={["Admin", "Article"]}
       >
         <div className="container">
           <Row>
@@ -171,7 +171,7 @@ const mapDispatch = ({ userProfile, article, event }) => ({
     userProfile.loginFirebase({ email, password }),
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchAllArticles: () => article.fetchAllArticles(),
-  downloadArticle: (index) => article.downloadArticle({index}),
+  downloadArticle: (id) => article.downloadArticle({id}),
   uploadArticle: (title, description, files, eventId) =>
     article.uploadArticle({ title, description, files, eventId }),
   deleteArticle: id => article.deleteArticle({ id }),

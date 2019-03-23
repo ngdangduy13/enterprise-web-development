@@ -20,7 +20,7 @@ class UploadArticle extends React.Component {
       .get();
     console.log(userRef.data());
     store.dispatch.article.findArticleSuccessfully({
-      ...userRef.data(),
+      ...userRef.data()
     });
   }
 
@@ -43,7 +43,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Student", "Article", "View", "Detail"]}
+        breadcrumb={["Student", "Article", "Detail"]}
       >
         <div className="container">
           <div className="card-container">
@@ -56,9 +56,9 @@ class UploadArticle extends React.Component {
             >
               <DynamicFileViewerWithNoSSR
                 fileType="docx"
-                filePath={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                  this.props.article.selectedArticle.paths.document[0]
-                )}?alt=media`}
+                filePath={`../../${
+                  this.props.article.selectedArticle.paths.documents[0]
+                }`}
                 onError={this.onError}
               />
               {this.props.article.selectedArticle.paths.images.length !== 0 && (
@@ -72,9 +72,10 @@ class UploadArticle extends React.Component {
                               <img
                                 alt="example"
                                 style={{ width: "100%" }}
-                                src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                                  item
-                                )}?alt=media`}
+                                src={`/${
+                                  this.props.article.selectedArticle.paths
+                                    .images[0]
+                                }`}
                               />
                             </Col>
                           )

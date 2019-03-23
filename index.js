@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const cors = require('cors')
+const fileUpload = require('express-fileupload')
 const { bootstrapNextjs } = require('./nextjs/bootstrapNextjs');
 const apiRouter = require('./api')
 
@@ -11,9 +12,15 @@ const bootstrap = async () => {
     const server = express();
     // Middleware
     server.use(cors());
-    server.use(bodyParser.urlencoded({ extended: true, limit: '20mb' }));
+    server.use(bodyParser.urlencoded({ extended: false}));
     server.use(bodyParser.json());
     server.use(cookieParser());
+    server.use(fileUpload({
+        createParentPath: true
+    }));
+    server.use('/static', express.static(__dirname + '/static'));
+
+
     await bootstrapNextjs(server);
     server.use('/api', apiRouter);
 

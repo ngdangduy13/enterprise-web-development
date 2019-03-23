@@ -13,20 +13,18 @@ const initialState = {
   isBusy: false
 };
 
-const uploadToFirebase = (id, file) => {
-  if (file.name.split(".")[1] === "doc" || file.name.split(".")[1] === "docx") {
-    firebase
-      .storage()
-      .ref()
-      .child(`${id}/document/${file.name}`)
-      .put(file);
-  } else {
-    firebase
-      .storage()
-      .ref()
-      .child(`${id}/images/${file.name}`)
-      .put(file);
-  }
+const uploadFile = (id, file) => {
+  console.log(file);
+  const data = new FormData();
+  data.append("file", file);
+  data.append("filename", file.name);
+  data.append("id", id);
+  return fetch("/api/articles/upload", {
+    method: "POST",
+    // headers: new Headers({ "Content-Type": "application/x-www-form-urlencoded" }),
+    credentials: "same-origin",
+    body: data
+  });
 };
 
 const article = createModel({
@@ -98,23 +96,24 @@ const article = createModel({
         const articleRef = firebase.firestore().collection("articles");
         const resultRef = await articleRef.add(data);
 
-        await payload.files.forEach(async file => {
-          await uploadToFirebase(resultRef.id, file);
-        });
-        const paths = { document: [], images: [] };
-        const pathsForDownload = [];
-        for (const path of payload.files) {
+        const pathsForDownload = new Array();
+        const paths = { documents: new Array(), images: new Array() };
+
+        for (const file of payload.files) {
+          const t = await uploadFile(resultRef.id, file);
+          const response = await t.json();
+          console.log(response.file);
+          pathsForDownload.push({ path: response.file, name: file.name });
           if (
-            path.name.split(".")[1] === "doc" ||
-            path.name.split(".")[1] === "docx"
+            file.name.split(".")[1] === "doc" ||
+            file.name.split(".")[1] === "docx"
           ) {
-            paths.document.push(`${resultRef.id}/document/${path.name}`);
-            pathsForDownload.push({ path: `${resultRef.id}/document/${path.name}`, name: path.name })
+            paths.documents.push(response.file);
           } else {
-            paths.images.push(`${resultRef.id}/images/${path.name}`);
-            pathsForDownload.push({ path: `${resultRef.id}/images/${path.name}`, name: path.name })
+            paths.images.push(response.file);
           }
         }
+
         articleRef.doc(resultRef.id).set(
           {
             paths,
@@ -143,7 +142,7 @@ const article = createModel({
             subject: "New uploaded articles",
             html: `<p>There is new article updated with title: ${
               data.title
-              } and by: ${rootState.userProfile.email}</p>`
+            } and by: ${rootState.userProfile.email}</p>`
           })
         });
 
@@ -271,9 +270,9 @@ const article = createModel({
               status: "Processing",
               comments: rootState.article.selectedArticle.comments
                 ? [
-                  ...rootState.article.selectedArticle.comments,
-                  { html: payload.comment, timestamp: moment().format("LL") }
-                ]
+                    ...rootState.article.selectedArticle.comments,
+                    { html: payload.comment, timestamp: moment().format("LL") }
+                  ]
                 : [{ html: payload.comment, timestamp: moment().format("LL") }]
             },
             { merge: true }
@@ -317,37 +316,12 @@ const article = createModel({
     async downloadArticle(payload, rootState) {
       try {
         this.updateBusyState(true);
-        const data = [];
-        for (const document of rootState.article.all[payload.index].paths
-          .document) {
-          const url = await firebase
-            .storage()
-            .ref(document)
-            .getDownloadURL();
-          data.push({ name: document.split("document/")[1], url });
-        }
-        for (const images of rootState.article.all[payload.index].paths
-          .images) {
-          const url = await firebase
-            .storage()
-            .ref(images)
-            .getDownloadURL();
-          data.push({ name: images.split("images/")[1], url });
-        }
-
-        const jsonData = JSON.stringify(data);
-
-        const fileZip = fetch(`/api/download`, {
-          method: "POST",
-          headers: new Headers({ "Content-Type": "application/json" }),
-          credentials: "same-origin",
-          body: JSON.stringify({
-            data,
-            id: rootState.article.all[payload.index].id
-          })
-        })
-
-        console.log(await fileZip);
+        Router.push(`/api/articles/download/${payload.id}`)
+        // fetch(`/api/articles/download/${payload.id}`, {
+        //   method: "GET",
+        //   // headers: new Headers({ "Content-Type": "application/json" }),
+        //   credentials: "same-origin"
+        // });
       } catch (er) {
         console.log(er);
         message.error(er.message);

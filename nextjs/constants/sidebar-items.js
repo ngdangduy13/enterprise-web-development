@@ -3,16 +3,9 @@ const sidebarStudentItems = [
     key: "article",
     title: "Article",
     permissions: [],
-    icon: "user",
-    isExpandable: true,
-    items: [
-      {
-        key: "/student/view-article",
-        path: "/student/view-article",
-        title: "View/Upload",
-        permissions: []
-      }
-    ]
+    icon: "file",
+    isExpandable: false,
+    path: "/student/view-article"
   }
 ];
 
@@ -30,45 +23,32 @@ const sidebarAdminItems = [
     title: "User",
     permissions: [],
     icon: "user",
-    isExpandable: true,
-    items: [
-      {
-        key: "/admin/view-user",
-        path: "/admin/view-user",
-        title: "View/Insert",
-        permissions: []
-      }
-    ]
+    isExpandable: false,
+    path: "/admin/view-user"
+  },
+  {
+    key: "magazine",
+    title: "Magazine",
+    permissions: [],
+    icon: "read",
+    isExpandable: false,
+    path: "/admin/view-event"
   },
   {
     key: "faculty",
     title: "Faculty",
     permissions: [],
     icon: "user",
-    isExpandable: true,
-    items: [
-      {
-        key: "/admin/view-faculty",
-        path: "/admin/view-faculty",
-        title: "View/Insert",
-        permissions: []
-      }
-    ]
+    isExpandable: false,
+    path: "/admin/view-faculty"
   },
   {
     key: "article",
     title: "Article",
     permissions: [],
     icon: "file",
-    isExpandable: true,
-    items: [
-      {
-        key: "/admin/view-article",
-        path: "/admin/view-article",
-        title: "View/Insert",
-        permissions: []
-      }
-    ]
+    isExpandable: false,
+    path: "/admin/view-article"
   }
 ];
 
@@ -78,36 +58,16 @@ const sidebarCoordItems = [
     title: "Student",
     permissions: [],
     icon: "user",
-    isExpandable: true,
-    items: [
-      {
-        key: "/coord/view-student",
-        path: "/coord/view-student",
-        title: "View/Insert",
-        permissions: []
-      }
-    ]
+    isExpandable: false,
+    path: "/coord/view-student"
   },
   {
-    key: "event",
-    title: "Event",
+    key: "article",
+    title: "Uploaded Articles",
     permissions: [],
-    icon: "read",
-    isExpandable: true,
-    items: [
-      {
-        key: "/coord/view-event",
-        path: "/coord/view-event",
-        title: "View/Insert",
-        permissions: []
-      },
-      {
-        key: "/coord/manage-uploaded-article",
-        path: "/coord/manage-uploaded-article",
-        title: "Manage uploaded articles",
-        permissions: []
-      }
-    ]
+    icon: "file",
+    path: "/coord/manage-uploaded-article",
+    isExpandable: false
   }
 ];
 

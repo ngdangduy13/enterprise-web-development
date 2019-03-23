@@ -36,7 +36,6 @@ const event = createModel({
         const querySnapshot = await firebase
           .firestore()
           .collection("events")
-          .where("facultyId", "==", rootState.userProfile.facultyId)
           .get();
         const events = [];
         querySnapshot.forEach(doc => {

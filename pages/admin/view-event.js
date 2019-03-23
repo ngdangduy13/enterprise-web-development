@@ -28,7 +28,6 @@ class UploadArticle extends React.Component {
     const querySnapshot = await firebase
       .firestore()
       .collection("events")
-      .where("facultyId", "==", store.getState().userProfile.facultyId)
       .get();
     const events = [];
     querySnapshot.forEach(doc => {
@@ -110,7 +109,7 @@ class UploadArticle extends React.Component {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const columns = [
       {
-        title: "Event Name",
+        title: "Magazine Name",
         dataIndex: "name",
         key: "name",
         sorter: true
@@ -145,7 +144,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Coordinator", "Event", "View"]}
+        breadcrumb={["Admin", "Magazine"]}
       >
         <div className="container">
           <Row>

@@ -1,0 +1,54 @@
+.magazine-page {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background: rgb(249, 250, 252);
+  padding: 50px 0px;
+}
+
+.card-container {
+  background: #fff;
+  border: 1px solid #e0e6ed;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+  padding: 75px 100px;
+
+  @media only screen and (max-width: 870px) {
+    border-left: none;
+    border-right: none;
+    padding: 75px 15px;
+  }
+}
+
+.h1-header {
+  color: #3e465b;
+  font-size: 35px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0 30px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.p-header {
+  color: #666d71;
+  display: block;
+  font-size: 1.1em;
+  margin: 0;
+  text-align: center;
+}
+
+.span-header {
+  background: #9c9da3;
+  display: block;
+  margin: 50px auto;
+  height: 1px;
+  width: 150px;
+}
+
+.doc {
+  width: 100% !important;
+}
+
+.document-container {
+  width: 100% !important;
+}

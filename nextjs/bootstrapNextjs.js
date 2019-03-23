@@ -26,7 +26,19 @@ const setupPublicRoutes = (server, app) => {
     });
   });
 
+  server.get("/magazine-post", async (req, res) => {
+    app.render(req, res, "/magazine-post", {
+      ...req.query
+    });
+  });
+
   server.get("/admin/dashboard", authorize("ADMIN"), async (req, res) => {
+    app.render(req, res, "/admin/dashboard", {
+      ...req.query
+    });
+  });
+
+  server.get("/admin/view-event", authorize("ADMIN"), async (req, res) => {
     app.render(req, res, "/admin/dashboard", {
       ...req.query
     });

@@ -60,7 +60,15 @@ class UploadArticle extends React.Component {
         const fullname = this.props.form.getFieldValue("fullname");
         const role = this.props.form.getFieldValue("role");
         const facultyId = this.props.form.getFieldValue("facultyId");
-        this.props.addUser(email, password, address, dob, fullname, role, facultyId);
+        this.props.addUser(
+          email,
+          password,
+          address,
+          dob,
+          fullname,
+          role,
+          facultyId
+        );
         this.props.form.resetFields();
       }
     });
@@ -105,6 +113,28 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderRole = (role, index) => {
+    let color;
+    let name;
+    if (role === "ADMIN") {
+      name = "Admin";
+      color = "#FFA422";
+    } else if (role === "COORD") {
+      name = "Coordinator";
+      color = "#2db7f5";
+    } else if (role === "STUDENT") {
+      name = "Student";
+      color = "#87d068";
+    }
+    return (
+      <span>
+        <Tag color={color} key={index}>
+          {name}
+        </Tag>
+      </span>
+    );
+  };
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const role = this.props.form.getFieldValue("role");
@@ -137,13 +167,6 @@ class UploadArticle extends React.Component {
         // sorter: true,
       },
       {
-        title: "Role",
-        dataIndex: "role",
-        key: "role",
-        width: "10%"
-        // sorter: true,
-      },
-      {
         title: "Date of birth",
         dataIndex: "dob",
         key: "dob"
@@ -152,6 +175,15 @@ class UploadArticle extends React.Component {
         title: "Address",
         dataIndex: "address",
         key: "address"
+      },
+      {
+        title: "Role",
+        dataIndex: "role",
+        key: "role",
+        width: "10%",
+        render: this.renderRole
+
+        // sorter: true,
       },
       {
         title: "Status",
@@ -178,7 +210,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={["Admin", "Users", "View"]}
+        breadcrumb={["Admin", "Users"]}
       >
         <div className="container">
           <Row>

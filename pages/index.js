@@ -36,16 +36,14 @@ class LandingPage extends React.Component {
                 {item.paths.images.length !== 0 && (
                   <div className="img-container">
                     <img
-                      src={`https://firebasestorage.googleapis.com/v0/b/testweb-3595a.appspot.com/o/${this.convertPath(
-                        item.paths.images[0]
-                      )}?alt=media`}
+                      src={`../${item.paths.images[0]}`}
                     />
                   </div>
                 )}
                 <h1 className="title">{item.title}</h1>
                 <span className="timeStamp">{item.timestamp}</span>
                 <p className="description">{item.description}</p>
-                <Link>
+                <Link href={`/magazine-post?articleId=${item.id}`}>
                   <div className="continue">Continue Reading &rarr;</div>
                 </Link>
               </div>
@@ -70,15 +68,12 @@ class LandingPage extends React.Component {
                   <div className="img-container">
                     <img src="/static/images/home.jpg" />
                   </div>
-                  <h1 className="title">Welcome to the Blog!</h1>
+                  <h1 className="title">Welcome to the magazine of FPT Greenwich!</h1>
                   <span className="timestamp">July 16, 2019</span>
                   <p className="description">
-                    Welcome to the new blog, I hope you enjoy your stay! This is
-                    an example of how you can control what excerpt shows up.
+                    Welcome to the new magazine, I hope you enjoy your stay! This is
+                    an example of how you can control what except shows up.
                   </p>
-                  <Link>
-                    <div className="continue">Continue Reading &rarr;</div>
-                  </Link>
                 </div>
               </div>
             </div>
