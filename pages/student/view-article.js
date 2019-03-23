@@ -41,16 +41,29 @@ class UploadArticle extends React.Component {
     super(props);
     this.state = {
       isVisible: false,
-      fileList: []
+      isUpdating: false,
+      fileList: [],
+      currentArticle: {}
     };
   }
 
-  toggleUploadArticle = () => {
+  toggleUploadArticle = (currentArticle, isUpdating) => {
     if (!this.state.isVisible) {
       this.props.fetchEvents();
     }
     this.setState({
-      isVisible: !this.state.isVisible
+      isVisible: !this.state.isVisible,
+      currentArticle,
+      isUpdating
+    });
+  };
+
+  closeUploadArticle = () => {
+    this.setState({
+      isVisible: false,
+      currentArticle: {},
+      isUpdating: false,
+      fileList: []
     });
   };
 
@@ -61,12 +74,18 @@ class UploadArticle extends React.Component {
         const title = this.props.form.getFieldValue("title");
         const description = this.props.form.getFieldValue("description");
         const event = this.props.form.getFieldValue("event");
-        const eventIndex = _.findIndex(this.props.event.all, (o) => { return o.id == event });
-        if (moment().format('LL') > this.props.event.all[eventIndex].closureDate) {
+        const eventIndex = _.findIndex(this.props.event.all, o => {
+          return o.id == event;
+        });
+        if (
+          moment().format("LL") > this.props.event.all[eventIndex].closureDate
+        ) {
           Modal.error({
-            title: 'Submmit Error',
-            content: `This event was closed in ${this.props.event.all[eventIndex].closureDate}`,
-          })
+            title: "Submmit Error",
+            content: `This magazine was closed in ${
+              this.props.event.all[eventIndex].closureDate
+            }`
+          });
         } else {
           this.props.uploadArticle(
             title,
@@ -82,6 +101,41 @@ class UploadArticle extends React.Component {
       }
     });
   };
+
+  updateArticle = e => {
+    e.preventDefault();
+    this.props.form.validateFields(async (error, _values) => {
+      if (!error) {
+        const title = this.props.form.getFieldValue("title");
+        const description = this.props.form.getFieldValue("description");
+        const event = this.props.form.getFieldValue("event");
+        const eventIndex = _.findIndex(this.props.event.all, o => {
+          return o.id == event;
+        });
+        if (
+          moment().format("LL") > this.props.event.all[eventIndex].finalClosureDate
+        ) {
+          Modal.error({
+            title: "Update Error",
+            content: `This magazine was closed for updating in ${
+              this.props.event.all[eventIndex].finalClosureDate
+            }`
+          });
+        } else {
+          // this.props.uploadArticle(
+          //   title,
+          //   description,
+          //   this.state.fileList,
+          //   event
+          // );
+          // this.setState({
+          //   fileList: []
+          // });
+          // this.props.form.resetFields();
+        }
+      }
+    });
+  };
   hasErrors = fieldsError => {
     return Object.keys(fieldsError).some(field => fieldsError[field]);
   };
@@ -89,7 +143,7 @@ class UploadArticle extends React.Component {
   actionButtons = (text, record) => {
     return (
       <div className="action-buttons">
-        <Tooltip title={"View details"}>
+        <Tooltip title={"View article details"}>
           <Button
             type="primary"
             icon="info-circle"
@@ -100,14 +154,24 @@ class UploadArticle extends React.Component {
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
+        <Tooltip title={"Update article"}>
+          <Button
+            type="primary"
+            icon="edit"
+            className="button"
+            onClick={() => this.toggleUploadArticle(record, true)}
+            style={{ marginRight: "12px" }}
+          />
+        </Tooltip>
       </div>
     );
   };
 
   render() {
+    console.log(this.state.currentArticle);
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const { fileList } = this.state;
-    const eventAvailable = this.props.event.all.filter(i => moment().format("LL") < i.closureDate)
+    const eventAvailable = this.props.event.all;
     const propsUpload = {
       onRemove: file => {
         this.setState(state => {
@@ -126,7 +190,7 @@ class UploadArticle extends React.Component {
           file.type === "image/jpg" ||
           file.type === "application/msword" ||
           file.type ===
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         if (isCorrectFileType) {
           this.setState(state => ({
             fileList: [...state.fileList, file]
@@ -196,7 +260,10 @@ class UploadArticle extends React.Component {
           <Row>
             <Col span={24} className="button-flex">
               <div className="add">
-                <Button type="primary" onClick={this.toggleUploadArticle}>
+                <Button
+                  type="primary"
+                  onClick={() => this.toggleUploadArticle({}, false)}
+                >
                   <Icon type="plus" /> Upload Article
                 </Button>
               </div>
@@ -222,13 +289,15 @@ class UploadArticle extends React.Component {
             />
           </div>
           <Modal
-            title="Upload Article"
+            title="Upload/Update Article"
             visible={this.state.isVisible}
             confirmLoading={this.props.article.isBusy}
             okText="Save"
             cancelText="Cancel"
-            onOk={this.uploadArticle}
-            onCancel={this.toggleUploadArticle}
+            onOk={
+              this.state.isUpdating ? this.updateArticle : this.uploadArticle
+            }
+            onCancel={this.closeUploadArticle}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
             }}
@@ -243,14 +312,15 @@ class UploadArticle extends React.Component {
                         required: true,
                         message: "Please fill the title before submitting"
                       }
-                    ]
+                    ],
+                    initialValue: this.state.currentArticle.title
                   })(
                     <Input
                       name="title"
                       prefix={<Icon type="mail" />}
                       placeholder="Title"
-                    // onChange={e => this.setState({ title: e.target.value })}
-                    // disabled={this.props.currentUser._id ? true : false}
+                      // onChange={e => this.setState({ title: e.target.value })}
+                      // disabled={this.props.currentUser._id ? true : false}
                     />
                   )}
                 </Form.Item>
@@ -258,17 +328,18 @@ class UploadArticle extends React.Component {
                 <Form.Item label="Description">
                   {getFieldDecorator("description", {
                     validateTrigger: "onBlur",
-                    validateFirst: true
+                    validateFirst: true,
+                    initialValue: this.state.currentArticle.description
                   })(
                     <Input
                       prefix={<Icon type="lock" />}
                       name="description"
                       placeholder="Description"
-                    // onChange={e => this.setState({ description: e.target.value })}
+                      // onChange={e => this.setState({ description: e.target.value })}
                     />
                   )}
                 </Form.Item>
-                <Form.Item label="Event">
+                <Form.Item label="Magazine">
                   {getFieldDecorator("event", {
                     rules: [
                       {
@@ -277,12 +348,15 @@ class UploadArticle extends React.Component {
                       }
                     ],
                     validateTrigger: "onBlur",
-                    validateFirst: true
+                    validateFirst: true,
+                    initialValue: this.state.currentArticle.eventId
                   })(
                     <Select
                       prefix={<Icon type="lock" />}
                       placeholder="Event"
-                      disabled={this.props.event.isBusy}
+                      disabled={
+                        this.props.event.isBusy || this.state.isUpdating
+                      }
                       style={{ width: "100%" }}
                     >
                       {eventAvailable.map(item => {
@@ -290,7 +364,7 @@ class UploadArticle extends React.Component {
                           <Select.Option value={item.id}>
                             {item.name}
                           </Select.Option>
-                        )
+                        );
                       })}
                     </Select>
                   )}
@@ -300,7 +374,7 @@ class UploadArticle extends React.Component {
                     {getFieldDecorator("dragger", {
                       rules: [
                         {
-                          required: true,
+                          required: !this.state.isUpdating,
                           message: "Please choose data before submitting"
                         }
                       ]
