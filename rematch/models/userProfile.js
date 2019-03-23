@@ -89,7 +89,7 @@ const profileModel = createModel({
           return;
         }
         const idToken = await firebase.auth().currentUser.getIdToken();
-        fetch("/api/login", {
+        fetch("/api/users/login", {
           method: "POST",
           headers: new Headers({ "Content-Type": "application/json" }),
           credentials: "same-origin",
@@ -127,7 +127,7 @@ const profileModel = createModel({
         const result = await firebase.auth().signOut();
         Router.push("/login");
 
-        fetch("/api/logout", {
+        fetch("/api/users/logout", {
           method: "POST",
           headers: new Headers({ "Content-Type": "application/json" }),
           credentials: "same-origin"

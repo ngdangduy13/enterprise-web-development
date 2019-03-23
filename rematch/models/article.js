@@ -102,19 +102,23 @@ const article = createModel({
           await uploadToFirebase(resultRef.id, file);
         });
         const paths = { document: [], images: [] };
+        const pathsForDownload = [];
         for (const path of payload.files) {
           if (
             path.name.split(".")[1] === "doc" ||
             path.name.split(".")[1] === "docx"
           ) {
             paths.document.push(`${resultRef.id}/document/${path.name}`);
+            pathsForDownload.push({ path: `${resultRef.id}/document/${path.name}`, name: path.name })
           } else {
             paths.images.push(`${resultRef.id}/images/${path.name}`);
+            pathsForDownload.push({ path: `${resultRef.id}/images/${path.name}`, name: path.name })
           }
         }
         articleRef.doc(resultRef.id).set(
           {
-            paths
+            paths,
+            pathsForDownload
           },
           { merge: true }
         );
@@ -130,7 +134,7 @@ const article = createModel({
           mails.push(doc.data().email);
         });
 
-        fetch("/api/send_email", {
+        fetch("/api/articles/send_email", {
           method: "POST",
           headers: new Headers({ "Content-Type": "application/json" }),
           credentials: "same-origin",
@@ -139,7 +143,7 @@ const article = createModel({
             subject: "New uploaded articles",
             html: `<p>There is new article updated with title: ${
               data.title
-            } and by: ${rootState.userProfile.email}</p>`
+              } and by: ${rootState.userProfile.email}</p>`
           })
         });
 
@@ -267,9 +271,9 @@ const article = createModel({
               status: "Processing",
               comments: rootState.article.selectedArticle.comments
                 ? [
-                    ...rootState.article.selectedArticle.comments,
-                    { html: payload.comment, timestamp: moment().format("LL") }
-                  ]
+                  ...rootState.article.selectedArticle.comments,
+                  { html: payload.comment, timestamp: moment().format("LL") }
+                ]
                 : [{ html: payload.comment, timestamp: moment().format("LL") }]
             },
             { merge: true }
@@ -333,7 +337,7 @@ const article = createModel({
 
         const jsonData = JSON.stringify(data);
 
-        const fileZip = await fetch(`/api/download`, {
+        const fileZip = fetch(`/api/download`, {
           method: "POST",
           headers: new Headers({ "Content-Type": "application/json" }),
           credentials: "same-origin",
@@ -341,9 +345,9 @@ const article = createModel({
             data,
             id: rootState.article.all[payload.index].id
           })
-        });
+        })
 
-        console.log(await fileZip.body);
+        console.log(await fileZip);
       } catch (er) {
         console.log(er);
         message.error(er.message);
