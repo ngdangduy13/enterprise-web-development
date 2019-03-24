@@ -61,7 +61,7 @@ const profileModel = createModel({
           email: userRef.data().email,
           fullname: userRef.data().fullname,
           role: userRef.data().role,
-          facultyId: userRef.data().facultyId,
+          facultyId: userRef.data().facultyId
         };
         this.loginSuccessfully(user);
       } catch (er) {
@@ -133,7 +133,7 @@ const profileModel = createModel({
     async logoutFirebase(payload, rootState) {
       try {
         this.updateBusyState(true);
-        const result = await firebase.auth().signOut();
+        firebase.auth().signOut();
 
         jsCookie.remove("token", { domain: "localhost" });
 

@@ -25,9 +25,6 @@ class LoginPage extends React.Component {
     const { getFieldDecorator } = this.props.form;
     return (
       <div className="login-page">
-        <Head>
-          <title>Login</title>
-        </Head>
         <Row>
           <Col xs={2} sm={4} lg={8} />
           <Col xs={20} sm={16} lg={8}>
