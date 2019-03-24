@@ -81,7 +81,6 @@ articlesRouter.get("/download/:id", async (req, res) => {
 
     zip.finalize();
 
-    console.log(article);
   } catch (error) {
     console.log(error);
     res.status(401).send(error);

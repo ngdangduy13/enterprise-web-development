@@ -19,7 +19,6 @@ import {
 import "../../static/css/coord/view-event.css";
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
-import Router from "next/router";
 import firebase from "../../firebase";
 import moment from "moment";
 
@@ -47,7 +46,6 @@ class UploadArticle extends React.Component {
   }
 
   toggleAddEvent = (currentEvent, isUpdating) => {
-    console.log(currentEvent);
     this.setState({
       isVisible: true,
       isUpdating,

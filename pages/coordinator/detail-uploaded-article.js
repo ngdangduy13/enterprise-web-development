@@ -75,8 +75,7 @@ class DetailUploadedArticle extends React.Component {
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
         breadcrumb={["Coordinator", "Uploaded articles", "Detail"]}
-        selectedKey="article"
-
+        selectedKey="article-coord"
       >
         <div className="container">
           <div className="card-article-container">

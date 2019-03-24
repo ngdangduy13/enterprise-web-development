@@ -22,7 +22,6 @@ import firebase from "../../firebase";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
-
     const querySnapshotArticles = await firebase
       .firestore()
       .collection("articles")
@@ -60,7 +59,7 @@ class UploadArticle extends React.Component {
             icon="info-circle"
             className="button"
             onClick={() =>
-              Router.push(`/coord/detail-uploaded-article?articleId=${record.id}`)
+              Router.push(`/coordinator/detail-uploaded-article?articleId=${record.id}`)
             }
             style={{ marginRight: "12px" }}
           />
@@ -158,8 +157,8 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        selectedKey="article"
         breadcrumb={["Coordinator", "Uploaded articles"]}
+        selectedKey="article-coord"
       >
         <div className="container">
           <Row>

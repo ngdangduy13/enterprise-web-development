@@ -54,19 +54,19 @@ const sidebarAdminItems = [
 
 const sidebarCoordItems = [
   {
-    key: "student",
+    key: "student-coord",
     title: "Student",
     permissions: [],
     icon: "user",
     isExpandable: false,
-    path: "/coord/view-student"
+    path: "/coordinator/view-student"
   },
   {
-    key: "article",
+    key: "article-coord",
     title: "Uploaded Articles",
     permissions: [],
     icon: "file",
-    path: "/coord/manage-uploaded-article",
+    path: "/coordinator/manage-uploaded-article",
     isExpandable: false
   }
 ];

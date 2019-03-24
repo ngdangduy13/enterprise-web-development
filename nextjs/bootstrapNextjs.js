@@ -73,44 +73,44 @@ const setupPublicRoutes = (server, app) => {
   );
 
   server.get(
-    "/student/detail-article/",
+    "/student/detail-article/:articleId",
     authorize("STUDENT"),
     async (req, res) => {
       app.render(req, res, "/student/detail-article", {
-        ...req.query
+        ...req.query,
+        articleId: req.params.articleId
       });
     }
   );
 
-  server.get("/coord/view-student", authorize("COORD"), async (req, res) => {
-    app.render(req, res, "/coordinator/view-student", {
-      ...req.query
-    });
-  });
-
   server.get(
-    "/coord/manage-uploaded-article",
+    "/coordinator/view-student",
     authorize("COORD"),
     async (req, res) => {
-      app.render(req, res, "/coordinator/manage-uploaded-article", {
+      app.render(req, res, "/coordinator/view-student", {
         ...req.query
       });
     }
   );
 
   server.get(
-    "/coord/detail-uploaded-article/",
+    "/coordinator/manage-uploaded-article",
     authorize("COORD"),
     async (req, res) => {
-      app.render(req, res, "/coordinator/detail-uploaded-article", req.query);
+      app.render(req, res, "/coordinator/manage-uploaded-article", req.query);
     }
   );
 
-  server.get("/coord/view-event", authorize("COORD"), async (req, res) => {
-    app.render(req, res, "/coordinator/view-event", {
-      ...req.query
-    });
-  });
+  server.get(
+    "/coordinator/detail-uploaded-article/:articleId",
+    authorize("COORD"),
+    async (req, res) => {
+      app.render(req, res, "/coordinator/detail-uploaded-article", {
+        ...req.query,
+        articleId: req.params.articleId
+      });
+    }
+  );
 
   server.get("/login", async (req, res) => {
     app.render(req, res, "/login", req.query);
@@ -119,8 +119,6 @@ const setupPublicRoutes = (server, app) => {
   server.get("/admin", authorize("ADMIN"), async (req, res) => {
     app.render(req, res, "/admin", req.query);
   });
-
-  
 };
 
 const bootstrapNextjs = async server => {

@@ -18,7 +18,6 @@ class UploadArticle extends React.Component {
       .collection("articles")
       .doc(query.articleId)
       .get();
-    console.log(userRef.data());
     store.dispatch.article.findArticleSuccessfully({
       ...userRef.data()
     });

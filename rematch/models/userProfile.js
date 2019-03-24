@@ -118,7 +118,7 @@ const profileModel = createModel({
           } else if (role === "ADMIN") {
             Router.push("/admin/dashboard");
           } else if (role === "COORD") {
-            Router.push("/coord/view-student");
+            Router.push("/coordinator/view-student");
           } else {
             Router.push("/error?statusCode=401");
           }

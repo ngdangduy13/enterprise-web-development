@@ -19,9 +19,7 @@ import {
 import "../../static/css/coord/view-student.css";
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
-import Router from "next/router";
 import firebase from "../../firebase";
-import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {

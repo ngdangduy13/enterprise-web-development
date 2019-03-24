@@ -25,7 +25,6 @@ class LandingPage extends React.Component {
   }
 
   render() {
-    console.log(this.props.article);
     const selectedArticle = this.props.article.selectedArticle;
     return (
       <div className="magazine-page">
