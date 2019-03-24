@@ -15,7 +15,6 @@ import {
   message
 } from "antd";
 import "../../static/css/coord/detail-article.css";
-import "braft-editor/dist/index.css";
 
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";

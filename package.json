@@ -11,6 +11,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "resolutions": {
+    "styled-jsx": "3.0.0"
+  },
   "dependencies": {
     "@rematch/core": "^1.1.0",
     "@zeit/next-css": "^1.0.1",
