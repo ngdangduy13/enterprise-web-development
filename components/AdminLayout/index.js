@@ -22,7 +22,6 @@ class AdminLayout extends React.Component {
   logOut = () => {
     this.props.logOut();
     // Redirect
-    Router.push('/login');
   }
 
   render() {

@@ -4,6 +4,7 @@ import "../static/css/login.css";
 import withRematch from "../rematch/withRematch";
 import initStore from "../rematch/store";
 import Head from "next/head";
+import Link from "next/link";
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -112,6 +113,9 @@ class LoginPage extends React.Component {
                   </Button>
                 </Form.Item>
               </Form>
+              <Link href={`/`}>
+                <div className="back-homepage">Back to homepage</div>
+              </Link>
             </div>
           </Col>
           <Col xs={2} sm={4} lg={8} />

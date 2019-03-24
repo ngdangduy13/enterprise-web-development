@@ -36,6 +36,7 @@ const event = createModel({
         const querySnapshot = await firebase
           .firestore()
           .collection("events")
+          .orderBy("timestamp", "desc")
           .get();
         const events = [];
         querySnapshot.forEach(doc => {
@@ -59,14 +60,47 @@ const event = createModel({
           finalClosureDate: payload.finalClosureDate,
           name: payload.name,
           facultyId: rootState.userProfile.facultyId,
-          description: payload.description !== undefined ? payload.description : '',
+          description:
+            payload.description !== undefined ? payload.description : "",
           timestamp: moment().format("LL")
         };
 
         const eventRef = firebase.firestore().collection("events");
-        const resultRef = await eventRef.add(data);
+        const result = await eventRef.add(data);
+
+        const counterData = {
+          contributions: 0,
+          contributors: 0,
+          contributionsWithoutComment: 0,
+          contributionsByFaculty: {}
+        };
+        const counterRef = firebase.firestore().collection("counter");
+        await counterRef.doc(result.id).set(counterData);
 
         message.success("Add event successfully");
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    },
+    async updateEvent(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+        const data = {
+          closureDate: payload.closureDate,
+          finalClosureDate: payload.finalClosureDate,
+          name: payload.name,
+          description:
+            payload.description !== undefined ? payload.description : "",
+          timestamp: moment().format("LL")
+        };
+
+        const eventRef = firebase.firestore().collection("events");
+        await eventRef.doc(payload.id).set(data, { merge: true });
+
+        message.success("Update event successfully");
       } catch (er) {
         console.log(er);
         message.error(er.message);

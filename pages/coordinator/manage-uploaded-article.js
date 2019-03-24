@@ -27,6 +27,7 @@ class UploadArticle extends React.Component {
       .firestore()
       .collection("articles")
       .where("facultyId", "==", store.getState().userProfile.facultyId)
+      .orderBy("timestamp", "desc")
       .get();
     const articles = [];
     querySnapshotArticles.forEach(doc => {
@@ -37,7 +38,6 @@ class UploadArticle extends React.Component {
     const querySnapshotEvents = await firebase
       .firestore()
       .collection("events")
-      .where("facultyId", "==", store.getState().userProfile.facultyId)
       .get();
     const events = [];
     querySnapshotEvents.forEach(doc => {
@@ -141,7 +141,7 @@ class UploadArticle extends React.Component {
       {
         title: "Status",
         dataIndex: "status",
-        key: "tstus",
+        key: "status",
         width: "12%",
         render: this.renderStatus
       },
@@ -158,6 +158,7 @@ class UploadArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
+        selectedKey="article"
         breadcrumb={["Coordinator", "Uploaded articles"]}
       >
         <div className="container">

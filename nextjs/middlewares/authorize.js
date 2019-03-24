@@ -34,9 +34,8 @@ const authorize = requiredPermission => {
         email: userRef.data().email,
         fullname: userRef.data().fullname,
         role: userRef.data().role,
+        facultyId: userRef.data().facultyId,
         uid: tokenData.uid,
-        facultyId:
-          userRef.data().role === "ADMIN" ? "" : userRef.data().facultyId
       };
       // Refresh Token
       req.query.profile = {

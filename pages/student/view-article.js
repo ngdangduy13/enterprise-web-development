@@ -22,6 +22,7 @@ import initStore from "../../rematch/store";
 import Router from "next/router";
 import firebase from "../../firebase";
 import moment from "moment";
+import _ from "lodash";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
@@ -29,6 +30,7 @@ class UploadArticle extends React.Component {
       .firestore()
       .collection("articles")
       .where("studentId", "==", store.getState().userProfile.uid)
+      .orderBy("timestamp", "desc")
       .get();
     const articles = [];
     querySnapshotArticles.forEach(doc => {
@@ -47,24 +49,42 @@ class UploadArticle extends React.Component {
     };
   }
 
-  toggleUploadArticle = (currentArticle, isUpdating) => {
-    if (!this.state.isVisible) {
+  toggleUploadArticle = (currentArticle, isUpdating, pathsForDownload) => {
+    if (!this.state.isVisible && this.props.event.all.length === 0) {
       this.props.fetchEvents();
+    }
+    let fileList = [];
+    if (pathsForDownload.length !== 0) {
+      fileList = pathsForDownload.map(item => {
+        return {
+          uid: item.uid,
+          name: item.name,
+          status: "done",
+          type: item.type,
+          url: `http://localhost:3000/${item.path}`,
+          thumbUrl: `http://localhost:3000/${item.path}`,
+          path: item.path
+        };
+      });
     }
     this.setState({
       isVisible: !this.state.isVisible,
       currentArticle,
-      isUpdating
+      isUpdating,
+      fileList
     });
   };
 
   closeUploadArticle = () => {
-    this.setState({
-      isVisible: false,
-      currentArticle: {},
-      isUpdating: false,
-      fileList: []
-    });
+    this.setState(
+      {
+        isVisible: false,
+        currentArticle: {},
+        isUpdating: false,
+        fileList: []
+      },
+      this.props.fetchArticles
+    );
   };
 
   uploadArticle = e => {
@@ -102,7 +122,7 @@ class UploadArticle extends React.Component {
     });
   };
 
-  updateArticle = e => {
+  updateArticle = async e => {
     e.preventDefault();
     this.props.form.validateFields(async (error, _values) => {
       if (!error) {
@@ -112,8 +132,10 @@ class UploadArticle extends React.Component {
         const eventIndex = _.findIndex(this.props.event.all, o => {
           return o.id == event;
         });
+
         if (
-          moment().format("LL") > this.props.event.all[eventIndex].finalClosureDate
+          moment().format("LL") >
+          this.props.event.all[eventIndex].finalClosureDate
         ) {
           Modal.error({
             title: "Update Error",
@@ -122,16 +144,17 @@ class UploadArticle extends React.Component {
             }`
           });
         } else {
-          // this.props.uploadArticle(
-          //   title,
-          //   description,
-          //   this.state.fileList,
-          //   event
-          // );
-          // this.setState({
-          //   fileList: []
-          // });
-          // this.props.form.resetFields();
+          await this.props.updateArticle(
+            title,
+            description,
+            this.state.fileList,
+            this.state.currentArticle.id
+          );
+          this.setState({
+            fileList: []
+          });
+          this.props.form.resetFields();
+          this.closeUploadArticle();
         }
       }
     });
@@ -159,7 +182,9 @@ class UploadArticle extends React.Component {
             type="primary"
             icon="edit"
             className="button"
-            onClick={() => this.toggleUploadArticle(record, true)}
+            onClick={() =>
+              this.toggleUploadArticle(record, true, record.pathsForDownload)
+            }
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
@@ -167,8 +192,25 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderStatus = (text, record, index) => {
+    let color;
+    if (record.status === "Unpublish") {
+      color = "red";
+    } else if (record.status === "Processing") {
+      color = "orange";
+    } else if (record.status === "Published") {
+      color = "green";
+    }
+    return (
+      <span>
+        <Tag color={color} key={index}>
+          {record.status}
+        </Tag>
+      </span>
+    );
+  };
+
   render() {
-    console.log(this.state.currentArticle);
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const { fileList } = this.state;
     const eventAvailable = this.props.event.all;
@@ -184,17 +226,33 @@ class UploadArticle extends React.Component {
         });
       },
       beforeUpload: file => {
-        const isCorrectFileType =
-          file.type === "image/jpeg" ||
-          file.type === "image/png" ||
-          file.type === "image/jpg" ||
+        const isCorrectFileTypeDoc =
           file.type === "application/msword" ||
           file.type ===
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        if (isCorrectFileType) {
-          this.setState(state => ({
-            fileList: [...state.fileList, file]
-          }));
+        const isCorrectFileTypeImage =
+          file.type === "image/jpeg" ||
+          file.type === "image/png" ||
+          file.type === "image/jpg";
+
+        if (isCorrectFileTypeDoc || isCorrectFileTypeImage) {
+          if (isCorrectFileTypeDoc) {
+            const newFileList = this.state.fileList.slice();
+            const index = _.findIndex(newFileList, i => i.type === file.type);
+            if (index !== -1) {
+              message.error("Only 1 file document is accepted");
+
+              // newFileList.splice(index, 1);
+            } else {
+              this.setState(state => ({
+                fileList: [...newFileList, file]
+              }));
+            }
+          } else {
+            this.setState(state => ({
+              fileList: [...state.fileList, file]
+            }));
+          }
         } else {
           message.error(
             "You can only upload file with .PNG, .JPEG, .JPG and Microsoft Word"
@@ -230,16 +288,10 @@ class UploadArticle extends React.Component {
       },
       {
         title: "Status",
-        dataIndex: "isPublish",
-        key: "isPublish",
+        dataIndex: "status",
+        key: "status",
         width: "12%",
-        render: (isPublish, index) => (
-          <span>
-            <Tag color={isPublish ? "green" : "orange"} key={index}>
-              {isPublish ? "Published" : "Unpublish"}
-            </Tag>
-          </span>
-        )
+        render: this.renderStatus
       },
       {
         title: "Actions",
@@ -255,6 +307,7 @@ class UploadArticle extends React.Component {
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
         breadcrumb={["Student", "Article"]}
+        selectedKey="article"
       >
         <div className="container">
           <Row>
@@ -262,7 +315,7 @@ class UploadArticle extends React.Component {
               <div className="add">
                 <Button
                   type="primary"
-                  onClick={() => this.toggleUploadArticle({}, false)}
+                  onClick={() => this.toggleUploadArticle({}, false, [])}
                 >
                   <Icon type="plus" /> Upload Article
                 </Button>
@@ -352,6 +405,7 @@ class UploadArticle extends React.Component {
                     initialValue: this.state.currentArticle.eventId
                   })(
                     <Select
+                      showSearch
                       prefix={<Icon type="lock" />}
                       placeholder="Event"
                       disabled={
@@ -361,7 +415,7 @@ class UploadArticle extends React.Component {
                     >
                       {eventAvailable.map(item => {
                         return (
-                          <Select.Option value={item.id}>
+                          <Select.Option value={item.id} key={item.id}>
                             {item.name}
                           </Select.Option>
                         );
@@ -369,15 +423,17 @@ class UploadArticle extends React.Component {
                     </Select>
                   )}
                 </Form.Item>
+
                 <Form.Item label="Article">
                   <div className="dropbox">
                     {getFieldDecorator("dragger", {
                       rules: [
                         {
-                          required: !this.state.isUpdating,
+                          required: true,
                           message: "Please choose data before submitting"
                         }
-                      ]
+                      ],
+                      initialValue: this.state.fileList
                     })(
                       <Upload.Dragger {...propsUpload}>
                         <p className="ant-upload-drag-icon">
@@ -432,6 +488,8 @@ const mapDispatch = ({ userProfile, article, event }) => ({
   fetchArticles: () => article.fetchArticles(),
   uploadArticle: (title, description, files, eventId) =>
     article.uploadArticle({ title, description, files, eventId }),
+  updateArticle: (title, description, files, id) =>
+    article.updateArticle({ title, description, files, id }),
   deleteArticle: id => article.deleteArticle({ id }),
   fetchEvents: () => event.fetchEvents()
 });

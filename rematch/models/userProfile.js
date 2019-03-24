@@ -4,12 +4,14 @@ import firebase from "../../firebase";
 import Router from "next/router";
 import "isomorphic-unfetch";
 import * as qs from "qs";
+import * as jsCookie from "js-cookie";
 
 const initialState = {
   email: "",
   uid: "",
   fullname: "",
   role: "",
+  facultyId: "",
 
   isBusy: false
 };
@@ -20,6 +22,7 @@ const profileModel = createModel({
     uid: "",
     fullname: "",
     role: "",
+    facultyId: "",
 
     isBusy: false
   },
@@ -57,7 +60,8 @@ const profileModel = createModel({
         const user = {
           email: userRef.data().email,
           fullname: userRef.data().fullname,
-          role: userRef.data().role
+          role: userRef.data().role,
+          facultyId: userRef.data().facultyId,
         };
         this.loginSuccessfully(user);
       } catch (er) {
@@ -77,19 +81,24 @@ const profileModel = createModel({
           .collection("users")
           .doc(resultLogin.user.uid)
           .get();
+
+        if (!userRef.data().isActive) {
+          message.error(
+            "Your account is locked. Please contact admin for more information"
+          );
+          return;
+        }
+
         const user = {
           email: userRef.data().email,
           uid: resultLogin.user.uid,
           fullname: userRef.data().fullname,
-          role: userRef.data().role
+          role: userRef.data().role,
+          facultyId: userRef.data().facultyId
         };
 
-        if (!userRef.data().isActive) {
-          message.error('Your account is locked. Please contact admin for more information');
-          return;
-        }
         const idToken = await firebase.auth().currentUser.getIdToken();
-        fetch("/api/users/login", {
+        await fetch("/api/users/login", {
           method: "POST",
           headers: new Headers({ "Content-Type": "application/json" }),
           credentials: "same-origin",
@@ -125,13 +134,10 @@ const profileModel = createModel({
       try {
         this.updateBusyState(true);
         const result = await firebase.auth().signOut();
-        Router.push("/login");
 
-        fetch("/api/users/logout", {
-          method: "POST",
-          headers: new Headers({ "Content-Type": "application/json" }),
-          credentials: "same-origin"
-        });
+        jsCookie.remove("token", { domain: "localhost" });
+
+        Router.push("/login");
 
         this.logoutSuccessfully();
       } catch (er) {

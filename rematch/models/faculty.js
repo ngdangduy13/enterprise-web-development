@@ -4,7 +4,6 @@ import firebase from "../../firebase";
 import _ from "lodash";
 import moment from "moment";
 
-
 const initialState = {
   all: [],
   isBusy: false
@@ -61,8 +60,7 @@ const student = createModel({
         };
 
         const eventRef = firebase.firestore().collection("faculties");
-        const resultRef = await eventRef.add(data);
-
+        const result = await eventRef.add(data);
         message.success("Add faculty successfully");
       } catch (er) {
         console.log(er);

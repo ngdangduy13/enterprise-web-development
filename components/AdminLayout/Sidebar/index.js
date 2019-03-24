@@ -5,6 +5,19 @@ import "./Sidebar.css";
 import sidebarItems from "../../../nextjs/constants/sidebar-items";
 
 class Sidebar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      current: this.props.selectedKey
+    };
+  }
+
+  handleClick = e => {
+    this.setState({
+      current: e.key
+    });
+  };
+
   renderSubmenu = submenu => {
     if (!submenu.isExpandable) {
       return (
@@ -45,19 +58,15 @@ class Sidebar extends React.Component {
   };
 
   render() {
+    console.log(this.props.selectedKey);
     return (
       // <div className="sidebar-menu">
       <Menu
+        onClick={this.handleClick}
         key="Menu"
         theme="dark"
         mode="inline"
-        // defaultOpenKeys={
-        //   sidebarItems[this.props.role] !== undefined &&
-        //   sidebarItems[this.props.role].map(item => item.key)
-        // }
-        // defaultSelectedKeys={
-        //   sidebarItems[this.props.role] !== undefined &&
-        //   sidebarItems[this.props.role].map(item => item.key)}
+        selectedKeys={[this.state.current]}
         style={{ padding: "16px 0", width: "100%" }}
       >
         {sidebarItems[this.props.role] !== undefined &&

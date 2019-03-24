@@ -48,3 +48,16 @@
 .login-form-forgot {
   float: right;
 }
+
+.back-homepage{
+  color: #666d71;
+  display: inline-block;
+  font-size: 14px;
+  text-decoration: none;
+  text-align: center;
+  width: 100%
+}
+
+.back-homepage:hover {
+  color: #3498db;
+}

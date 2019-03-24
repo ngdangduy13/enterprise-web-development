@@ -82,6 +82,7 @@ const article = createModel({
     async uploadArticle(payload, rootState) {
       try {
         this.updateBusyState(true);
+        const facultyId = rootState.userProfile.facultyId;
         const data = {
           title: payload.title,
           description:
@@ -90,7 +91,7 @@ const article = createModel({
           studentId: rootState.userProfile.uid,
           isPublish: false,
           eventId: payload.eventId,
-          facultyId: rootState.userProfile.facultyId,
+          facultyId: facultyId,
           status: "Unpublish"
         };
         const articleRef = firebase.firestore().collection("articles");
@@ -103,7 +104,12 @@ const article = createModel({
           const t = await uploadFile(resultRef.id, file);
           const response = await t.json();
           console.log(response.file);
-          pathsForDownload.push({ path: response.file, name: file.name });
+          pathsForDownload.push({
+            path: response.file,
+            name: file.name,
+            uid: file.uid,
+            type: file.type
+          });
           if (
             file.name.split(".")[1] === "doc" ||
             file.name.split(".")[1] === "docx"
@@ -125,7 +131,7 @@ const article = createModel({
         const facultyEmails = await firebase
           .firestore()
           .collection("users")
-          .where("facultyId", "==", rootState.userProfile.facultyId)
+          .where("facultyId", "==", facultyId)
           .where("role", "==", "COORD")
           .get();
         const mails = [];
@@ -142,9 +148,40 @@ const article = createModel({
             subject: "New uploaded articles",
             html: `<p>There is new article updated with title: ${
               data.title
-            } and by: ${rootState.userProfile.email}</p>`
+            } and by: ${
+              rootState.userProfile.email
+            }. Please make comment within 14 days</p>`
           })
         });
+
+        const counterRef = firebase.firestore().collection("counter");
+        const counterResult = await counterRef.doc(payload.eventId).get();
+        const counterData = {
+          contributions: counterResult.data().contributions + 1,
+          contributionsByFaculty: {
+            [facultyId]:
+              counterResult.data().contributionsByFaculty[facultyId] !==
+              undefined
+                ? counterResult.data().contributionsByFaculty[facultyId] + 1
+                : 1
+          },
+          contributionsWithoutComment:
+            counterResult.data().contributionsWithoutComment + 1,
+          contributors:
+            rootState.article.all.length === 0
+              ? counterResult.data().contributors + 1
+              : counterResult.data().contributors,
+          contributorsByFaculty: {
+            [facultyId]:
+              counterResult.data().contributorsByFaculty[facultyId] !==
+              undefined
+                ? rootState.article.all.length === 0
+                  ? counterResult.data().contributorsByFaculty[facultyId] + 1
+                  : counterResult.data().contributorsByFaculty[facultyId]
+                : 1
+          }
+        };
+        counterRef.doc(payload.eventId).set(counterData, { merge: true });
 
         message.success("Upload successfully");
       } catch (er) {
@@ -178,6 +215,7 @@ const article = createModel({
           .firestore()
           .collection("articles")
           .where("studentId", "==", rootState.userProfile.uid)
+          .orderBy("timestamp", "desc")
           .get();
         const articles = [];
         querySnapshot.forEach(doc => {
@@ -200,6 +238,7 @@ const article = createModel({
           .firestore()
           .collection("articles")
           .where("facultyId", "==", rootState.userProfile.facultyId)
+          .orderBy("timestamp", "desc")
           .get();
         const articles = [];
         querySnapshot.forEach(doc => {
@@ -222,6 +261,7 @@ const article = createModel({
           .firestore()
           .collection("articles")
           .where("status", "==", "Published")
+          .orderBy("timestamp", "desc")
           .get();
         const articles = [];
         querySnapshot.forEach(doc => {
@@ -243,6 +283,7 @@ const article = createModel({
         const querySnapshot = await firebase
           .firestore()
           .collection("articles")
+          .orderBy("timestamp", "desc")
           .get();
         const articles = [];
         querySnapshot.forEach(doc => {
@@ -267,7 +308,10 @@ const article = createModel({
           .doc(rootState.article.selectedArticle.id)
           .set(
             {
-              status: "Processing",
+              status:
+                rootState.article.selectedArticle.status === "Published"
+                  ? rootState.article.selectedArticle.status
+                  : "Processing",
               comments: rootState.article.selectedArticle.comments
                 ? [
                     ...rootState.article.selectedArticle.comments,
@@ -277,6 +321,14 @@ const article = createModel({
             },
             { merge: true }
           );
+
+        const counterRef = firebase.firestore().collection("counter");
+        const counterResult = await counterRef.doc(payload.eventId).get();
+        const counterData = {
+          contributionsWithoutComment:
+            counterResult.data().contributionsWithoutComment - 1
+        };
+        counterRef.doc(payload.eventId).set(counterData, { merge: true });
         message.success("Add comment successfully");
       } catch (er) {
         console.log(er);
@@ -316,12 +368,79 @@ const article = createModel({
     async downloadArticle(payload, rootState) {
       try {
         this.updateBusyState(true);
-        Router.push(`/api/articles/download/${payload.id}`)
+        Router.push(`/api/articles/download/${payload.id}`);
         // fetch(`/api/articles/download/${payload.id}`, {
         //   method: "GET",
         //   // headers: new Headers({ "Content-Type": "application/json" }),
         //   credentials: "same-origin"
         // });
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    },
+    async updateArticle(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+
+        const pathsForDownload = new Array();
+        const paths = { documents: new Array(), images: new Array() };
+
+        for (const file of payload.files) {
+          if (file.status !== "done") {
+            const t = await uploadFile(payload.id, file);
+            const response = await t.json();
+            pathsForDownload.push({
+              path: response.file,
+              name: file.name,
+              uid: file.uid,
+              type: file.type
+            });
+            if (
+              file.name.split(".")[1] === "doc" ||
+              file.name.split(".")[1] === "docx"
+            ) {
+              paths.documents.push(response.file);
+            } else {
+              paths.images.push(response.file);
+            }
+          } else {
+            pathsForDownload.push({
+              path: file.path,
+              name: file.name,
+              uid: file.uid,
+              type: file.type
+            });
+            if (
+              file.name.split(".")[1] === "doc" ||
+              file.name.split(".")[1] === "docx"
+            ) {
+              paths.documents.push(file.path);
+            } else {
+              paths.images.push(file.path);
+            }
+          }
+        }
+        const data = {
+          title: payload.title,
+          description:
+            payload.description !== undefined ? payload.description : "",
+          timestamp: moment().format("LL"),
+          pathsForDownload,
+          paths
+        };
+
+        const articleRef = firebase.firestore().collection("articles");
+        articleRef.doc(payload.id).set(
+          {
+            ...data
+          },
+          { merge: true }
+        );
+
+        message.success("Update successfully");
       } catch (er) {
         console.log(er);
         message.error(er.message);

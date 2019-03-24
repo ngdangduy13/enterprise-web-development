@@ -5,6 +5,7 @@ import event from './models/event';
 import user from './models/user';
 import article from './models/article';
 import faculty from './models/faculty';
+import counter from './models/counter';
 
 
 export const initStore = (initialState) => {
@@ -15,7 +16,8 @@ export const initStore = (initialState) => {
             student,
             event,
             user,
-            faculty
+            faculty,
+            counter
         },
         redux: {
             initialState

@@ -93,7 +93,6 @@ const setupPublicRoutes = (server, app) => {
     authorize("COORD"),
     async (req, res) => {
       app.render(req, res, "/coordinator/manage-uploaded-article", {
-        // articles,
         ...req.query
       });
     }

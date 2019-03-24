@@ -71,3 +71,22 @@
 img {
   width: 100%;
 }
+
+.top-bar {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  position: fixed;
+  top: 0px;
+  z-index: 10;
+  padding: 0px 30px;
+  -webkit-box-shadow: 0 8px 6px -6px #999;
+  -moz-box-shadow: 0 8px 6px -6px #999;
+  box-shadow: 0 10px 14px -10px #999;
+}
+
+.top-bar-container {
+  width: 100%;
+}

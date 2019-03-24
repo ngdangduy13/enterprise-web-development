@@ -28,6 +28,7 @@ class UploadArticle extends React.Component {
     const querySnapshot = await firebase
       .firestore()
       .collection("events")
+      .orderBy("timestamp", "desc")
       .get();
     const events = [];
     querySnapshot.forEach(doc => {
@@ -39,17 +40,33 @@ class UploadArticle extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isVisible: false
+      isVisible: false,
+      isUpdating: false,
+      currentEvent: {}
     };
   }
 
-  toggleAddEvent = () => {
+  toggleAddEvent = (currentEvent, isUpdating) => {
+    console.log(currentEvent);
     this.setState({
-      isVisible: !this.state.isVisible
+      isVisible: true,
+      isUpdating,
+      currentEvent
     });
   };
 
-  addEvent = e => {
+  closeAddEvent = () => {
+    this.setState(
+      {
+        isVisible: false,
+        isUpdating: false,
+        currentEvent: {}
+      },
+      this.props.fetchEvents
+    );
+  };
+
+  addEvent = async e => {
     e.preventDefault();
     this.props.form.validateFields(async (error, _values) => {
       if (!error) {
@@ -61,7 +78,18 @@ class UploadArticle extends React.Component {
         ).format("LL");
         const name = this.props.form.getFieldValue("name");
         const description = this.props.form.getFieldValue("description");
-        this.props.addEvent(closureDate, finalClosureDate, name, description);
+        if (this.state.isUpdating) {
+          await this.props.updateEvent(
+            closureDate,
+            finalClosureDate,
+            name,
+            description,
+            this.state.currentEvent.id
+          );
+          this.closeAddEvent();
+        } else {
+          this.props.addEvent(closureDate, finalClosureDate, name, description);
+        }
         this.props.form.resetFields();
       }
     });
@@ -105,6 +133,22 @@ class UploadArticle extends React.Component {
     );
   };
 
+  actionButtons = (text, record, index) => {
+    return (
+      <div className="action-buttons">
+        <Tooltip title={"Update magazine"}>
+          <Button
+            type="primary"
+            icon="edit"
+            className="button"
+            onClick={() => this.toggleAddEvent(record, true)}
+            style={{ marginRight: "12px" }}
+          />
+        </Tooltip>
+      </div>
+    );
+  };
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const columns = [
@@ -137,6 +181,13 @@ class UploadArticle extends React.Component {
         key: "isActive",
         width: "12%",
         render: this.renderStatus
+      },
+      {
+        title: "Actions",
+        dataIndex: "actions",
+        key: "actions",
+        render: this.actionButtons,
+        width: "11%"
       }
     ];
     return (
@@ -145,12 +196,16 @@ class UploadArticle extends React.Component {
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
         breadcrumb={["Admin", "Magazine"]}
+        selectedKey="magazine"
       >
         <div className="container">
           <Row>
             <Col span={24} className="button-flex">
               <div className="add">
-                <Button type="primary" onClick={this.toggleAddEvent}>
+                <Button
+                  type="primary"
+                  onClick={() => this.toggleAddEvent({}, false)}
+                >
                   <Icon type="plus" /> Add New Event
                 </Button>
               </div>
@@ -176,13 +231,13 @@ class UploadArticle extends React.Component {
             />
           </div>
           <Modal
-            title="Add Event"
+            title="Add/Update Magazine"
             visible={this.state.isVisible}
             confirmLoading={this.props.event.isBusy}
             okText="Save"
             cancelText="Cancel"
             onOk={this.addEvent}
-            onCancel={this.toggleAddEvent}
+            onCancel={this.closeAddEvent}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
             }}
@@ -196,7 +251,8 @@ class UploadArticle extends React.Component {
                         required: true,
                         message: "Please fill event name before submitting"
                       }
-                    ]
+                    ],
+                    initialValue: this.state.currentEvent.name
                   })(
                     <Input
                       name="name"
@@ -207,7 +263,9 @@ class UploadArticle extends React.Component {
                 </Form.Item>
 
                 <Form.Item label="Description" hasFeedback>
-                  {getFieldDecorator("description", {})(
+                  {getFieldDecorator("description", {
+                    initialValue: this.state.currentEvent.description
+                  })(
                     <Input
                       prefix={<Icon type="lock" />}
                       name="description"
@@ -224,7 +282,8 @@ class UploadArticle extends React.Component {
                         message:
                           "Please fill the closure date before submitting"
                       }
-                    ]
+                    ],
+                    initialValue: moment(this.state.currentEvent.closureDate)
                   })(<DatePicker style={{ width: "100%" }} />)}
                 </Form.Item>
                 <Form.Item label="Final closure date" hasFeedback>
@@ -235,7 +294,10 @@ class UploadArticle extends React.Component {
                         message:
                           "Please fill the final closure date before submitting"
                       }
-                    ]
+                    ],
+                    initialValue: moment(
+                      this.state.currentEvent.finalClosureDate
+                    )
                   })(<DatePicker style={{ width: "100%" }} />)}
                 </Form.Item>
               </Form>
@@ -256,7 +318,9 @@ const mapDispatch = ({ userProfile, event }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchEvents: () => event.fetchEvents(),
   addEvent: (closureDate, finalClosureDate, name, description) =>
-    event.addEvent({ closureDate, finalClosureDate, name, description })
+    event.addEvent({ closureDate, finalClosureDate, name, description }),
+  updateEvent: (closureDate, finalClosureDate, name, description, id) =>
+    event.updateEvent({ closureDate, finalClosureDate, name, description, id })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

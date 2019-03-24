@@ -28,6 +28,7 @@ class UploadArticle extends React.Component {
     const querySnapshotArticles = await firebase
       .firestore()
       .collection("articles")
+      .orderBy("timestamp", "desc")
       .get();
     const articles = [];
     querySnapshotArticles.forEach(doc => {
@@ -82,6 +83,24 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderStatus = (text, record, index) => {
+    let color;
+    if (record.status === 'Unpublish') {
+      color = 'red'
+    } else if (record.status === 'Processing') {
+      color = 'orange'
+    } else if (record.status === 'Published') {
+      color = 'green'
+    }
+    return (
+      <span>
+        <Tag color={color} key={index}>
+          {record.status}
+        </Tag>
+      </span>
+    )
+  }
+
   render() {
     const columns = [
       {
@@ -104,16 +123,10 @@ class UploadArticle extends React.Component {
       },
       {
         title: "Status",
-        dataIndex: "isPublish",
-        key: "isPublish",
+        dataIndex: "status",
+        key: "status",
         width: "12%",
-        render: (isPublish, index) => (
-          <span>
-            <Tag color={isPublish ? "green" : "orange"} key={index}>
-              {isPublish ? "Published" : "Unpublish"}
-            </Tag>
-          </span>
-        )
+        render: this.renderStatus
       },
       {
         title: "Actions",
@@ -129,6 +142,7 @@ class UploadArticle extends React.Component {
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
         breadcrumb={["Admin", "Article"]}
+        selectedKey="article"
       >
         <div className="container">
           <Row>

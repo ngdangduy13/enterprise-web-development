@@ -62,7 +62,10 @@ class DetailUploadedArticle extends React.Component {
   };
 
   submitComment = () => {
-    this.props.makeComment(this.state.editorState.toHTML());
+    this.props.makeComment(
+      this.state.editorState.toHTML(),
+      this.props.article.selectedArticle.eventId
+    );
   };
 
   render() {
@@ -71,14 +74,12 @@ class DetailUploadedArticle extends React.Component {
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
-        breadcrumb={[
-          "Coordinator",
-          "Uploaded articles",
-          "Detail"
-        ]}
+        breadcrumb={["Coordinator", "Uploaded articles", "Detail"]}
+        selectedKey="article"
+
       >
         <div className="container">
-          <div className="card-container">
+          <div className="card-article-container">
             <Card
               title={this.props.article.selectedArticle.title}
               bordered
@@ -94,26 +95,31 @@ class DetailUploadedArticle extends React.Component {
                 onError={this.onError}
               />
               <div className="image-container">
-                <Collapse accordion>
-                  <Collapse.Panel header="Images" key="1">
-                    <Row>
-                      {this.props.article.selectedArticle.paths.images.map(
-                        item => (
-                          <Col xs={24} sm={16} lg={8}>
-                            <img
-                              alt="example"
-                              style={{ width: "100%" }}
-                              src={`/${
-                                this.props.article.selectedArticle.paths
-                                  .images[0]
-                              }`}
-                            />
-                          </Col>
-                        )
-                      )}
-                    </Row>
-                  </Collapse.Panel>
-                </Collapse>
+                {this.props.article.selectedArticle.paths.images.length !==
+                  0 && (
+                  <div className="image-container">
+                    <Collapse accordion>
+                      <Collapse.Panel header="Images" key="1">
+                        <Row>
+                          {this.props.article.selectedArticle.paths.images.map(
+                            item => (
+                              <Col xs={24} sm={16} lg={8}>
+                                <img
+                                  alt="example"
+                                  style={{ width: "100%" }}
+                                  src={`/${
+                                    this.props.article.selectedArticle.paths
+                                      .images[0]
+                                  }`}
+                                />
+                              </Col>
+                            )
+                          )}
+                        </Row>
+                      </Collapse.Panel>
+                    </Collapse>
+                  </div>
+                )}
               </div>
               {this.props.article.selectedArticle.comments !== undefined && (
                 <div className="comment-container">
@@ -176,7 +182,7 @@ const mapState = state => ({
 
 const mapDispatch = ({ userProfile, article }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
-  makeComment: comment => article.makeComment({ comment })
+  makeComment: (comment, eventId) => article.makeComment({ comment, eventId })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(
