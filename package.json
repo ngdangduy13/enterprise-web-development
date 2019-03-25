@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node index.js",
     "build": "next build",
-    "start": "next start"
+    "start": "NODE_ENV=production node server.js",
+    "now-build": "next build"
+
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "fpt-magazine",
+  "builds": [
+    {
+      "src": "next.config.js",
+      "use": "@now/next",
+      "config": { "maxLambdaSize": "50mb" }
+    }
+  ]
+}

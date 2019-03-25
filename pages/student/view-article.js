@@ -61,8 +61,8 @@ class UploadArticle extends React.Component {
           name: item.name,
           status: "done",
           type: item.type,
-          url: `http://localhost:3000/${item.path}`,
-          thumbUrl: `http://localhost:3000/${item.path}`,
+          url: `/${item.path}`,
+          thumbUrl: `/${item.path}`,
           path: item.path
         };
       });
