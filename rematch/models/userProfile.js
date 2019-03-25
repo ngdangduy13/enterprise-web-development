@@ -135,7 +135,7 @@ const profileModel = createModel({
         this.updateBusyState(true);
         firebase.auth().signOut();
 
-        jsCookie.remove("token", { domain: "localhost" });
+        jsCookie.remove("token", { domain: "g7-web.herokuapp.com" });
 
         Router.push("/login");
 
