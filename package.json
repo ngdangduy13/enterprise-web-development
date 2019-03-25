@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node index.js",
     "build": "next build",
-    "start": "NODE_ENV=development node ."
+    "start": "NODE_ENV=production node ."
   },
   "keywords": [],
   "author": "",
