@@ -167,14 +167,14 @@ class LoginPage extends React.Component {
                 <Col xs={8} sm={8} lg={8}>
                   <Statistic
                     title="Contributors"
-                    value={counter[eventCounterIndex].contributions}
+                    value={counter[eventCounterIndex].contributors}
                     suffix="students"
                   />
                 </Col>
                 <Col xs={8} sm={8} lg={8}>
                   <Statistic
                     title="Contributions without comments"
-                    value={counter[eventCounterIndex].contributions}
+                    value={counter[eventCounterIndex].contributionsWithoutComment}
                     suffix="articles"
                   />
                 </Col>
