@@ -8,7 +8,6 @@ if (typeof require !== "undefined") {
 
 /* Without CSS Modules, with PostCSS */
 module.exports = withCSS({
-  target: 'serverless',
   webpack: function(config, { dev }) {
     if (dev) {
       config.devtool = "cheap-module-source-map";
