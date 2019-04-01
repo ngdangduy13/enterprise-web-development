@@ -55,8 +55,7 @@ const student = createModel({
         const data = {
           name: payload.name,
           address: payload.address,
-
-          createdDate: moment().format("LL")
+          createdDate: moment().valueOf()
         };
 
         const eventRef = firebase.firestore().collection("faculties");

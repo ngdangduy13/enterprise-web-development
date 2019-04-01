@@ -98,7 +98,7 @@ class UploadArticle extends React.Component {
           return o.id == event;
         });
         if (
-          moment().format("LL") > this.props.event.all[eventIndex].closureDate
+          moment().valueOf() > this.props.event.all[eventIndex].closureDate
         ) {
           Modal.error({
             title: "Submmit Error",
@@ -134,7 +134,7 @@ class UploadArticle extends React.Component {
         });
 
         if (
-          moment().format("LL") >
+          moment().valueOf() >
           this.props.event.all[eventIndex].finalClosureDate
         ) {
           Modal.error({
@@ -210,6 +210,14 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderUploadedDate = (text, record, index) => {
+    return (
+      <span>
+          {moment(record.timestamp).format("LL")}
+      </span>
+    );
+  };
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const { fileList } = this.state;
@@ -278,7 +286,8 @@ class UploadArticle extends React.Component {
         title: "Uploaded Date",
         dataIndex: "timestamp",
         key: "timestamp",
-        width: "20%"
+        width: "20%",
+        render: this.renderUploadedDate
         // sorter: true,
       },
       {

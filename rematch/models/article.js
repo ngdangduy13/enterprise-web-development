@@ -87,7 +87,7 @@ const article = createModel({
           title: payload.title,
           description:
             payload.description !== undefined ? payload.description : "",
-          timestamp: moment().format("LL"),
+          timestamp: moment().valueOf(),
           studentId: rootState.userProfile.uid,
           isPublish: false,
           eventId: payload.eventId,
@@ -315,9 +315,9 @@ const article = createModel({
               comments: rootState.article.selectedArticle.comments
                 ? [
                     ...rootState.article.selectedArticle.comments,
-                    { html: payload.comment, timestamp: moment().format("LL") }
+                    { html: payload.comment, timestamp: moment().valueOf() }
                   ]
-                : [{ html: payload.comment, timestamp: moment().format("LL") }]
+                : [{ html: payload.comment, timestamp: moment().valueOf() }]
             },
             { merge: true }
           );
@@ -427,7 +427,7 @@ const article = createModel({
           title: payload.title,
           description:
             payload.description !== undefined ? payload.description : "",
-          timestamp: moment().format("LL"),
+          timestamp: moment().valueOf(),
           pathsForDownload,
           paths
         };

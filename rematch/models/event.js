@@ -59,10 +59,9 @@ const event = createModel({
           closureDate: payload.closureDate,
           finalClosureDate: payload.finalClosureDate,
           name: payload.name,
-          facultyId: rootState.userProfile.facultyId,
           description:
             payload.description !== undefined ? payload.description : "",
-          timestamp: moment().format("LL")
+          timestamp: moment().valueOf()
         };
 
         const eventRef = firebase.firestore().collection("events");
@@ -72,7 +71,9 @@ const event = createModel({
           contributions: 0,
           contributors: 0,
           contributionsWithoutComment: 0,
-          contributionsByFaculty: {}
+          contributionsByFaculty: {},
+          contributorsByFaculty: {}
+
         };
         const counterRef = firebase.firestore().collection("counter");
         await counterRef.doc(result.id).set(counterData);
@@ -94,7 +95,7 @@ const event = createModel({
           name: payload.name,
           description:
             payload.description !== undefined ? payload.description : "",
-          timestamp: moment().format("LL")
+          timestamp: moment().valueOf()
         };
 
         const eventRef = firebase.firestore().collection("events");

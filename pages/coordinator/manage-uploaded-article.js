@@ -19,6 +19,7 @@ import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import Router from "next/router";
 import firebase from "../../firebase";
+import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
@@ -59,7 +60,9 @@ class UploadArticle extends React.Component {
             icon="info-circle"
             className="button"
             onClick={() =>
-              Router.push(`/coordinator/detail-uploaded-article?articleId=${record.id}`)
+              Router.push(
+                `/coordinator/detail-uploaded-article?articleId=${record.id}`
+              )
             }
             style={{ marginRight: "12px" }}
           />
@@ -71,10 +74,11 @@ class UploadArticle extends React.Component {
             className="button"
             onClick={() =>
               Modal.confirm({
-                title: 'Do you want to publish this article?',
-                content: 'Warning: This action cannot be taken back, please consider before submitting',
+                title: "Do you want to publish this article?",
+                content:
+                  "Warning: This action cannot be taken back, please consider before submitting",
                 onOk: () => {
-                  this.props.publishArticle(record.id)
+                  this.props.publishArticle(record.id);
                 }
               })
             }
@@ -86,20 +90,18 @@ class UploadArticle extends React.Component {
   };
 
   renderEvent = (text, record) => {
-    const event = this.props.event.all.filter(i => i.id === record.eventId)
-    return (
-      <span>{event[0].name}</span>
-    )
-  }
+    const event = this.props.event.all.filter(i => i.id === record.eventId);
+    return <span>{event[0].name}</span>;
+  };
 
   renderStatus = (text, record, index) => {
     let color;
-    if (record.status === 'Unpublish') {
-      color = 'red'
-    } else if (record.status === 'Processing') {
-      color = 'orange'
-    } else if (record.status === 'Published') {
-      color = 'green'
+    if (record.status === "Unpublish") {
+      color = "red";
+    } else if (record.status === "Processing") {
+      color = "orange";
+    } else if (record.status === "Published") {
+      color = "green";
     }
     return (
       <span>
@@ -107,8 +109,12 @@ class UploadArticle extends React.Component {
           {record.status}
         </Tag>
       </span>
-    )
-  }
+    );
+  };
+
+  renderUploadedDate = (text, record, index) => {
+    return <span>{moment(record.timestamp).format("LL")}</span>;
+  };
 
   render() {
     const columns = [
@@ -129,7 +135,8 @@ class UploadArticle extends React.Component {
         title: "Uploaded Date",
         dataIndex: "timestamp",
         key: "timestamp",
-        width: "20%"
+        width: "20%",
+        render: this.renderUploadedDate
         // sorter: true,
       },
       {
@@ -199,7 +206,7 @@ const mapState = state => ({
 const mapDispatch = ({ userProfile, article, event }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchUploadedArticles: () => article.fetchUploadedArticles(),
-  publishArticle: (id) => article.publishArticle({id})
+  publishArticle: id => article.publishArticle({ id })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

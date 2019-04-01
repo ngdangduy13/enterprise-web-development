@@ -20,6 +20,7 @@ import "../../static/css/coord/view-student.css";
 import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import firebase from "../../firebase";
+import moment from "moment";
 
 class UploadArticle extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
@@ -79,6 +80,10 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderCreatedDate = (text, record, index) => {
+    return <span>{moment(record.createdDate).format("LL")}</span>;
+  };
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const columns = [
@@ -98,7 +103,8 @@ class UploadArticle extends React.Component {
       {
         title: "Created at",
         dataIndex: "createdDate",
-        key: "createdDate"
+        key: "createdDate",
+        render: this.renderCreatedDate
         // width: "10%"
         // sorter: true,
       },
@@ -107,8 +113,7 @@ class UploadArticle extends React.Component {
         dataIndex: "isActive",
         key: "actions",
         render: this.actionButtons,
-        width: "11%",
-
+        width: "11%"
       }
     ];
     return (

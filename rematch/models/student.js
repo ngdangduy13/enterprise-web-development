@@ -63,7 +63,8 @@ const student = createModel({
           facultyId: rootState.userProfile.facultyId,
           role: "STUDENT",
           isActive: true,
-          fullname: payload.fullname
+          fullname: payload.fullname,
+          timestamp: moment().valueOf()
         };
 
         const result = await firebase

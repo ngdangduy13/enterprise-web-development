@@ -57,7 +57,7 @@ class UploadArticle extends React.Component {
       if (!error) {
         const email = this.props.form.getFieldValue("email");
         const password = this.props.form.getFieldValue("password");
-        const dob = moment(this.props.form.getFieldValue("dob")).format("LL");
+        const dob = moment(this.props.form.getFieldValue("dob")).valueOf();
         const address = this.props.form.getFieldValue("address");
         const fullname = this.props.form.getFieldValue("fullname");
         this.props.addStudent(email, password, address, dob, fullname);
@@ -105,6 +105,14 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderDob = (text, record, index) => {
+    return (
+      <span>
+          {moment(record.dob).format("LL")}
+      </span>
+    );
+  };
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const columns = [
@@ -124,7 +132,8 @@ class UploadArticle extends React.Component {
       {
         title: "Date of birth",
         dataIndex: "dob",
-        key: "dob"
+        key: "dob",
+        render: this.renderDob
       },
       {
         title: "Address",

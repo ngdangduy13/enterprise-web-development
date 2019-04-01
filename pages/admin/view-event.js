@@ -147,6 +147,22 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderClosureDate = (text, record, index) => {
+    return (
+      <span>
+          {moment(record.closureDate).format("LL")}
+      </span>
+    );
+  };
+
+  renderFinalClosureDate = (text, record, index) => {
+    return (
+      <span>
+          {moment(record.finalClosureDate).format("LL")}
+      </span>
+    );
+  };
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const columns = [
@@ -166,12 +182,14 @@ class UploadArticle extends React.Component {
       {
         title: "Closure Date",
         dataIndex: "closureDate",
-        key: "closureDate"
+        key: "closureDate",
+        render: this.renderClosureDate
       },
       {
         title: "Final Closure Date",
         dataIndex: "finalClosureDate",
-        key: "finalClosureDate"
+        key: "finalClosureDate",
+        render: this.renderFinalClosureDate
       },
       {
         title: "Status",
@@ -204,7 +222,7 @@ class UploadArticle extends React.Component {
                   type="primary"
                   onClick={() => this.toggleAddEvent({}, false)}
                 >
-                  <Icon type="plus" /> Add New Event
+                  <Icon type="plus" /> Add New Magazine
                 </Button>
               </div>
               <div className="refresh">

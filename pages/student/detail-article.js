@@ -6,6 +6,7 @@ import withRematch from "../../rematch/withRematch";
 import initStore from "../../rematch/store";
 import dynamic from "next/dynamic";
 import firebase from "../../firebase";
+import moment from "moment";
 
 const DynamicFileViewerWithNoSSR = dynamic(() => import("react-file-viewer"), {
   ssr: false
@@ -50,9 +51,9 @@ class UploadArticle extends React.Component {
             <Card
               title={this.props.article.selectedArticle.title}
               bordered
-              extra={`Uploaded Date: ${
+              extra={`Uploaded Date: ${moment(
                 this.props.article.selectedArticle.timestamp
-              }`}
+              ).format("LL")}`}
             >
               <DynamicFileViewerWithNoSSR
                 fileType="docx"

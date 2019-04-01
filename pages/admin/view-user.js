@@ -135,6 +135,10 @@ class UploadArticle extends React.Component {
     );
   };
 
+  renderDob = (text, record, index) => {
+    return <span>{moment(record.dob).format("LL")}</span>;
+  };
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const role = this.props.form.getFieldValue("role");
@@ -169,7 +173,8 @@ class UploadArticle extends React.Component {
       {
         title: "Date of birth",
         dataIndex: "dob",
-        key: "dob"
+        key: "dob",
+        render: this.renderDob
       },
       {
         title: "Address",

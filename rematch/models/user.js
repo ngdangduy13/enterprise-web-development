@@ -2,6 +2,7 @@ import { createModel } from "@rematch/core";
 import { message } from "antd";
 import firebase from "../../firebase";
 import _ from "lodash";
+import moment from "moment";
 
 const initialState = {
   all: [],
@@ -56,10 +57,11 @@ const student = createModel({
           email: payload.email,
           address: payload.address,
           dob: payload.dob,
-          facultyId: payload.facultyId === undefined ? '' : payload.facultyId,
+          facultyId: payload.facultyId === undefined ? "" : payload.facultyId,
           role: payload.role,
           isActive: true,
-          fullname: payload.fullname
+          fullname: payload.fullname,
+          timestamp: moment().valueOf()
         };
 
         const result = await firebase
