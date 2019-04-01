@@ -95,7 +95,6 @@ const profileModel = createModel({
           fullname: userRef.data().fullname,
           role: userRef.data().role,
           facultyId: userRef.data().facultyId,
-          contributedEvent: userRef.data().contributedEvent
         };
 
         const idToken = await firebase.auth().currentUser.getIdToken();
