@@ -61,7 +61,8 @@ const student = createModel({
           role: payload.role,
           isActive: true,
           fullname: payload.fullname,
-          timestamp: moment().valueOf()
+          timestamp: moment().valueOf(),
+          contributedEvent: []
         };
 
         const result = await firebase

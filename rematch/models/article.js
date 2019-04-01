@@ -168,16 +168,26 @@ const article = createModel({
           contributionsWithoutComment:
             counterResult.data().contributionsWithoutComment + 1,
           contributors:
-            rootState.article.all.length === 0
+            _.findIndex(
+              rootState.article.all,
+              i => i.eventId === payload.eventId
+            ) === -1
               ? counterResult.data().contributors + 1
+              : counterResult.data().contributors === 0
+              ? 1
               : counterResult.data().contributors,
           contributorsByFaculty: {
             [facultyId]:
               counterResult.data().contributorsByFaculty[facultyId] !==
               undefined
-                ? rootState.article.all.length === 0
-                  ? counterResult.data().contributorsByFaculty[facultyId] + 1
-                  : counterResult.data().contributorsByFaculty[facultyId]
+                ? _.findIndex(
+                    rootState.article.all,
+                    i => i.eventId === payload.eventId
+                  ) === -1
+                  ? counterResult.data().contributors + 1
+                  : counterResult.data().contributors === 0
+                  ? 1
+                  : counterResult.data().contributors
                 : 1
           }
         };

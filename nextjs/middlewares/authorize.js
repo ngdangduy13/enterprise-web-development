@@ -35,6 +35,7 @@ const authorize = requiredPermission => {
         fullname: userRef.data().fullname,
         role: userRef.data().role,
         facultyId: userRef.data().facultyId,
+        contributedEvent: userRef.data().contributedEvent,
         uid: tokenData.uid,
       };
       // Refresh Token

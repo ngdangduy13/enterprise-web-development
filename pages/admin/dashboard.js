@@ -61,7 +61,8 @@ class LoginPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedEventId: this.props.event.all[0].id
+      selectedEventId:
+        this.props.event.all.length === 0 ? -1 : this.props.event.all[0].id
     };
   }
 
@@ -174,7 +175,9 @@ class LoginPage extends React.Component {
                 <Col xs={8} sm={8} lg={8}>
                   <Statistic
                     title="Contributions without comments"
-                    value={counter[eventCounterIndex].contributionsWithoutComment}
+                    value={
+                      counter[eventCounterIndex].contributionsWithoutComment
+                    }
                     suffix="articles"
                   />
                 </Col>
