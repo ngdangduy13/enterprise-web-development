@@ -34,7 +34,7 @@ class LandingPage extends React.Component {
           <div className="card-container">
             <div className="card">
               <div>
-                {item.paths.images.length !== 0 && (
+                {item.paths && item.paths.images.length !== 0 && (
                   <div className="img-container">
                     <img src={`../${item.paths.images[0]}`} />
                   </div>
@@ -55,6 +55,7 @@ class LandingPage extends React.Component {
   };
 
   render() {
+    console.log(this.props.article);
     return (
       <div className="home-page">
         <div className="top-bar">
@@ -90,7 +91,8 @@ class LandingPage extends React.Component {
           </Col>
           <Col xs={1} sm={2} lg={3} />
         </Row>
-        {this.props.article.publishedArticles.map(this.renderArticles)}
+        {this.props.article.publishedArticles.length !== 0 &&
+          this.props.article.publishedArticles.map(this.renderArticles)}
       </div>
     );
   }

@@ -7,6 +7,7 @@ import withRematch from "../rematch/withRematch";
 import initStore from "../rematch/store";
 import firebase from "../firebase";
 import dynamic from "next/dynamic";
+import moment from "moment";
 
 const DynamicFileViewerWithNoSSR = dynamic(() => import("react-file-viewer"), {
   ssr: false
@@ -34,7 +35,7 @@ class LandingPage extends React.Component {
             <div className="card-header-container">
               <div className="header">
                 <h1 className="h1-header">{selectedArticle.title}</h1>
-                <p className="p-header">{selectedArticle.timestamp}</p>
+                <p className="p-header">{moment(selectedArticle.timestamp).format("LL")}</p>
                 <span className="span-header" />
               </div>
 
