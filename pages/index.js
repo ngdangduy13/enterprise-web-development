@@ -6,6 +6,7 @@ import Link from "next/link";
 import withRematch from "../rematch/withRematch";
 import initStore from "../rematch/store";
 import firebase from "../firebase";
+import moment from "moment";
 
 class LandingPage extends React.Component {
   static async getInitialProps({ store, isServer, pathname, query }) {
@@ -40,7 +41,9 @@ class LandingPage extends React.Component {
                   </div>
                 )}
                 <h1 className="title">{item.title}</h1>
-                <span className="timeStamp">{item.timestamp}</span>
+                <span className="timeStamp">
+                  {moment(item.timestamp).format("LL")}
+                </span>
                 <p className="description">{item.description}</p>
                 <Link href={`/magazine-post?articleId=${item.id}`}>
                   <div className="continue">Continue Reading &rarr;</div>
@@ -79,7 +82,7 @@ class LandingPage extends React.Component {
                   <h1 className="title">
                     Welcome to the magazine of FPT Greenwich!
                   </h1>
-                  <span className="timestamp">July 16, 2019</span>
+                  {/* <span className="timestamp">July 16, 2019</span> */}
                   <p className="description">
                     Welcome to the new magazine, I hope you enjoy your stay!
                     This is an example of how you can control what except shows
