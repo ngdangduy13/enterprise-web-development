@@ -94,7 +94,7 @@ const profileModel = createModel({
           uid: resultLogin.user.uid,
           fullname: userRef.data().fullname,
           role: userRef.data().role,
-          facultyId: userRef.data().facultyId,
+          facultyId: userRef.data().facultyId
         };
 
         const idToken = await firebase.auth().currentUser.getIdToken();
@@ -125,7 +125,7 @@ const profileModel = createModel({
         }
         message.success("Login successfully");
       } catch (er) {
-        message.error(er.message);
+        message.error("Email or password is not correct");
       } finally {
         this.updateBusyState(false);
       }
