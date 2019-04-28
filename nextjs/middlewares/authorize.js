@@ -35,7 +35,7 @@ const authorize = requiredPermission => {
         fullname: userRef.data().fullname,
         role: userRef.data().role,
         facultyId: userRef.data().facultyId,
-        uid: tokenData.uid,
+        uid: tokenData.uid
       };
       // Refresh Token
       req.query.profile = {
@@ -44,7 +44,7 @@ const authorize = requiredPermission => {
       };
       // // Verify Permissions
       if (requiredPermission && user.role !== requiredPermission) {
-        res.redirect("/error");
+        res.status(401).send("Unauthorized");
       } else if (!requiredPermission) {
         next();
         return;
