@@ -2,6 +2,7 @@ import * as React from "react";
 import { Menu, Icon } from "antd";
 import Link from "next/link";
 import "./Sidebar.css";
+import Router from "next/router";
 import sidebarItems from "../../../nextjs/constants/sidebar-items";
 
 class Sidebar extends React.Component {
@@ -13,6 +14,8 @@ class Sidebar extends React.Component {
   }
 
   handleClick = e => {
+    console.log(e);
+    Router.push(e.key);
     this.setState({
       current: e.key
     });
@@ -50,9 +53,9 @@ class Sidebar extends React.Component {
   renderMenuItem = menuitem => {
     return (
       <Menu.Item key={`${menuitem.key}`} className="submenu-item">
-        <Link href={menuitem.path}>
-          <span>{menuitem.title}</span>
-        </Link>
+        {/* <Link href={menuitem.path}> */}
+        <span>{menuitem.title}</span>
+        {/* </Link> */}
       </Menu.Item>
     );
   };

@@ -141,13 +141,23 @@ class UploadArticle extends React.Component {
         width: "11%"
       }
     ];
+
+    const rowSelection = {
+      onChange: (selectedRowKeys, selectedRows) => {
+        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      },
+      getCheckboxProps: record => ({
+        disabled: record.name === 'Disabled User', // Column configuration not to be checked
+        name: record.name,
+      }),
+    };
     return (
       <AdminLayout
         userEmail={this.props.userProfile.email}
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
         breadcrumb={["Admin", "Article"]}
-        selectedKey="article"
+        selectedKey="/admin/view-article"
       >
         <div className="container">
           <Row>
@@ -162,10 +172,21 @@ class UploadArticle extends React.Component {
                   Refresh
                 </Button>
               </div>
+              <div className="refresh">
+                <Button
+                  type="primary"
+                  onClick={this.props.fetchAllArticles}
+                  loading={this.props.article.isBusy}
+                  icon="download"
+                >
+                  Download selected file
+                </Button>
+              </div>
             </Col>
           </Row>
           <div className="users-table">
             <Table
+              rowSelection={rowSelection}
               size="middle"
               loading={this.props.article.isBusy}
               columns={columns}

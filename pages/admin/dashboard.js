@@ -132,7 +132,7 @@ class LoginPage extends React.Component {
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
         breadcrumb={["Admin", "Dashboard"]}
-        selectedKey="dashboard"
+        selectedKey="/admin/dashboard"
       >
         <div className="container">
           <Row>

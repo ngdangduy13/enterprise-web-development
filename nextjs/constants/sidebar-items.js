@@ -1,6 +1,6 @@
 const sidebarStudentItems = [
   {
-    key: "article",
+    key: "/student/view-article",
     title: "Article",
     permissions: [],
     icon: "file",
@@ -11,7 +11,7 @@ const sidebarStudentItems = [
 
 const sidebarAdminItems = [
   {
-    key: "dashboard",
+    key: "/admin/dashboard",
     title: "Dashboard",
     permissions: [],
     icon: "dashboard",
@@ -19,7 +19,7 @@ const sidebarAdminItems = [
     isExpandable: false
   },
   {
-    key: "user",
+    key: "/admin/view-user",
     title: "User",
     permissions: [],
     icon: "user",
@@ -27,7 +27,7 @@ const sidebarAdminItems = [
     path: "/admin/view-user"
   },
   {
-    key: "magazine",
+    key: "/admin/view-event",
     title: "Magazine",
     permissions: [],
     icon: "read",
@@ -35,7 +35,7 @@ const sidebarAdminItems = [
     path: "/admin/view-event"
   },
   {
-    key: "faculty",
+    key: "/admin/view-faculty",
     title: "Faculty",
     permissions: [],
     icon: "user",
@@ -43,7 +43,7 @@ const sidebarAdminItems = [
     path: "/admin/view-faculty"
   },
   {
-    key: "article",
+    key: "/admin/view-article",
     title: "Article",
     permissions: [],
     icon: "file",
@@ -54,7 +54,7 @@ const sidebarAdminItems = [
 
 const sidebarCoordItems = [
   {
-    key: "student-coord",
+    key: "/coordinator/view-student",
     title: "Student",
     permissions: [],
     icon: "user",
@@ -62,7 +62,7 @@ const sidebarCoordItems = [
     path: "/coordinator/view-student"
   },
   {
-    key: "article-coord",
+    key: "/coordinator/manage-uploaded-article",
     title: "Uploaded Articles",
     permissions: [],
     icon: "file",

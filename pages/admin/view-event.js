@@ -212,7 +212,7 @@ class UploadArticle extends React.Component {
         logOut={this.props.logoutFirebase}
         role={this.props.userProfile.role}
         breadcrumb={["Admin", "Magazine"]}
-        selectedKey="magazine"
+        selectedKey="/admin/view-event"
       >
         <div className="container">
           <Row>

@@ -33,7 +33,7 @@ class LandingPage extends React.Component {
           <Col xs={1} sm={2} lg={3} />
           <Col xs={22} sm={20} lg={18}>
             <div className="card-header-container">
-              <div className="header">
+              <div className="magazine-post-header">
                 <h1 className="h1-header">{selectedArticle.title}</h1>
                 <p className="p-header">{moment(selectedArticle.timestamp).format("LL")}</p>
                 <span className="span-header" />
