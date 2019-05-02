@@ -34,18 +34,32 @@ class UploadArticle extends React.Component {
       users.push({ ...doc.data(), id: doc.id });
     });
     store.dispatch.user.fetchUsersSuccessfully(users);
+
+    const querySnapshotFaculty = await firebase
+      .firestore()
+      .collection("faculties")
+      .get();
+    const faculties = [];
+    querySnapshotFaculty.forEach(doc => {
+      faculties.push({ ...doc.data(), id: doc.id });
+    });
+    store.dispatch.faculty.fetchFacultiesSuccessfully(faculties);
   }
 
   constructor(props) {
     super(props);
     this.state = {
-      isVisible: false
+      isVisible: false,
+      currentUser: {},
+      isUpdating: false
     };
   }
 
-  toggleAddUser = () => {
+  toggleAddUser = (currentUser, isVisible, isUpdating) => {
     this.setState({
-      isVisible: !this.state.isVisible
+      isVisible,
+      currentUser,
+      isUpdating
     });
   };
 
@@ -60,6 +74,7 @@ class UploadArticle extends React.Component {
         const fullname = this.props.form.getFieldValue("fullname");
         const role = this.props.form.getFieldValue("role");
         const facultyId = this.props.form.getFieldValue("facultyId");
+
         this.props.addUser(
           email,
           password,
@@ -68,6 +83,28 @@ class UploadArticle extends React.Component {
           fullname,
           role,
           facultyId
+        );
+        this.props.form.resetFields();
+      }
+    });
+  };
+
+  updateUser = e => {
+    e.preventDefault();
+    this.props.form.validateFields(async (error, _values) => {
+      if (!error) {
+        const dob = moment(this.props.form.getFieldValue("dob")).valueOf();
+        const address = this.props.form.getFieldValue("address");
+        const fullname = this.props.form.getFieldValue("fullname");
+        const role = this.props.form.getFieldValue("role");
+        const facultyId = this.props.form.getFieldValue("facultyId");
+        this.props.updateUser(
+          address,
+          dob,
+          fullname,
+          role,
+          facultyId,
+          this.state.currentUser.id
         );
         this.props.form.resetFields();
       }
@@ -87,7 +124,7 @@ class UploadArticle extends React.Component {
     }
   };
 
-  actionButtons = (text, record) => {
+  actionButtons = (text, record, index) => {
     return (
       <div className="action-buttons">
         <Tooltip title="Edit user info">
@@ -95,7 +132,7 @@ class UploadArticle extends React.Component {
             type="primary"
             icon="edit"
             className="button"
-            // onClick={(_event) => this.props.openAddUserModal({currentUser: record})}
+            onClick={() => this.toggleAddUser(record, true, true)}
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
@@ -141,7 +178,9 @@ class UploadArticle extends React.Component {
 
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
-    const role = this.props.form.getFieldValue("role");
+    const role = this.props.form.getFieldValue("role")
+      ? this.props.form.getFieldValue("role")
+      : this.state.currentUser.role;
     const roles = [
       {
         id: "ADMIN",
@@ -222,7 +261,10 @@ class UploadArticle extends React.Component {
           <Row>
             <Col span={24} className="button-flex">
               <div className="add">
-                <Button type="primary" onClick={this.toggleAddUser}>
+                <Button
+                  type="primary"
+                  onClick={() => this.toggleAddUser({}, true, false)}
+                >
                   <Icon type="plus" /> Add New Users
                 </Button>
               </div>
@@ -248,82 +290,88 @@ class UploadArticle extends React.Component {
             />
           </div>
           <Modal
-            title="Add User"
+            title="Add/Update User"
             visible={this.state.isVisible}
             confirmLoading={this.props.user.isBusy}
             okText="Save"
             cancelText="Cancel"
-            onOk={this.addUser}
-            onCancel={this.toggleAddUser}
+            onOk={this.state.isUpdating ? this.updateUser : this.addUser}
+            onCancel={() => this.toggleAddUser({}, false, false)}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
             }}
           >
             <div className="input-user-info">
               <Form>
-                <Form.Item label="Email" hasFeedback>
-                  {getFieldDecorator("email", {
-                    rules: [
-                      {
-                        required: true,
-                        message: "Please fill the email before submitting"
-                      },
-                      {
-                        type: "email",
-                        message: "The input is not valid E-mail!"
-                      }
-                    ]
-                  })(
-                    <Input
-                      name="email"
-                      prefix={<Icon type="mail" />}
-                      placeholder="Email"
-                      // onChange={e => this.setState({ title: e.target.value })}
-                      // disabled={this.props.currentUser._id ? true : false}
-                    />
-                  )}
-                </Form.Item>
+                {!this.state.isUpdating && (
+                  <div>
+                    <Form.Item label="Email" hasFeedback>
+                      {getFieldDecorator("email", {
+                        rules: [
+                          {
+                            required: true,
+                            message: "Please fill the email before submitting"
+                          },
+                          {
+                            type: "email",
+                            message: "The input is not valid E-mail!"
+                          }
+                        ]
+                      })(
+                        <Input
+                          name="email"
+                          prefix={<Icon type="mail" />}
+                          placeholder="Email"
+                          // onChange={e => this.setState({ title: e.target.value })}
+                          // disabled={this.props.currentUser._id ? true : false}
+                        />
+                      )}
+                    </Form.Item>
 
-                <Form.Item label="Password" hasFeedback>
-                  {getFieldDecorator("password", {
-                    rules: [
-                      {
-                        required: true,
-                        message: "Please fill the password before submitting"
-                      }
-                    ]
-                  })(
-                    <Input
-                      prefix={<Icon type="lock" />}
-                      name="password"
-                      type="password"
-                      placeholder="Password"
-                      // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
-                </Form.Item>
-                <Form.Item label="Confirm Password" hasFeedback>
-                  {getFieldDecorator("confirmPassword", {
-                    rules: [
-                      {
-                        required: true,
-                        message:
-                          "Please fill the confirm password before submitting"
-                      },
-                      {
-                        validator: this.compareToFirstPassword
-                      }
-                    ]
-                  })(
-                    <Input
-                      prefix={<Icon type="lock" />}
-                      name="confirmPassword"
-                      type="password"
-                      placeholder="Confirm Password"
-                      // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
-                </Form.Item>
+                    <Form.Item label="Password" hasFeedback>
+                      {getFieldDecorator("password", {
+                        rules: [
+                          {
+                            required: true,
+                            message:
+                              "Please fill the password before submitting"
+                          }
+                        ]
+                      })(
+                        <Input
+                          prefix={<Icon type="lock" />}
+                          name="password"
+                          type="password"
+                          placeholder="Password"
+                          // onChange={e => this.setState({ description: e.target.value })}
+                        />
+                      )}
+                    </Form.Item>
+                    <Form.Item label="Confirm Password" hasFeedback>
+                      {getFieldDecorator("confirmPassword", {
+                        rules: [
+                          {
+                            required: true,
+                            message:
+                              "Please fill the confirm password before submitting"
+                          },
+                          {
+                            validator: this.compareToFirstPassword
+                          }
+                        ]
+                      })(
+                        <Input
+                          prefix={<Icon type="lock" />}
+                          name="confirmPassword"
+                          type="password"
+                          placeholder="Confirm Password"
+                          // onChange={e => this.setState({ description: e.target.value })}
+                        />
+                      )}
+                    </Form.Item>
+                  </div>
+                )}
+
                 <Form.Item label="Role">
                   {getFieldDecorator("role", {
                     rules: [
@@ -333,19 +381,20 @@ class UploadArticle extends React.Component {
                       }
                     ],
                     validateTrigger: "onBlur",
-                    validateFirst: true
+                    validateFirst: true,
+                    initialValue: this.state.currentUser.role
                   })(
                     <Select
                       prefix={<Icon type="lock" />}
                       placeholder="Role"
                       style={{ width: "100%" }}
-                      onSelect={value => {
-                        if (value === "COORD" || value === "STUDENT") {
-                          if (this.props.faculty.all.length === 0) {
-                            this.props.fetchFaculties();
-                          }
-                        }
-                      }}
+                      // onSelect={value => {
+                      //   if (value === "COORD" || value === "STUDENT") {
+                      //     if (this.props.faculty.all.length === 0) {
+                      //       this.props.fetchFaculties();
+                      //     }
+                      //   }
+                      // }}
                     >
                       {roles.map(item => {
                         return (
@@ -359,7 +408,7 @@ class UploadArticle extends React.Component {
                 </Form.Item>
                 {(role === "COORD" || role === "STUDENT") && (
                   <Form.Item label="Faculty">
-                    {getFieldDecorator("faculty", {
+                    {getFieldDecorator("facultyId", {
                       rules: [
                         {
                           required: true,
@@ -367,7 +416,8 @@ class UploadArticle extends React.Component {
                         }
                       ],
                       validateTrigger: "onBlur",
-                      validateFirst: true
+                      validateFirst: true,
+                      initialValue: this.state.currentUser.facultyId
                     })(
                       <Select
                         prefix={<Icon type="lock" />}
@@ -393,7 +443,8 @@ class UploadArticle extends React.Component {
                         required: true,
                         message: "Please fill the full name before submitting"
                       }
-                    ]
+                    ],
+                    initialValue: this.state.currentUser.fullname
                   })(
                     <Input
                       prefix={<Icon type="profile" />}
@@ -411,7 +462,8 @@ class UploadArticle extends React.Component {
                         message:
                           "Please fill the date of birth before submitting"
                       }
-                    ]
+                    ],
+                    initialValue: moment(this.state.currentUser.dob)
                   })(
                     <DatePicker
                       style={{ width: "100%" }}
@@ -429,7 +481,8 @@ class UploadArticle extends React.Component {
                         required: true,
                         message: "Please fill the address before submitting"
                       }
-                    ]
+                    ],
+                    initialValue: this.state.currentUser.address
                   })(
                     <Input
                       prefix={<Icon type="shop" />}
@@ -462,7 +515,9 @@ const mapDispatch = ({ userProfile, user, faculty }) => ({
   fetchFaculties: () => faculty.fetchFaculties(),
   toggleActiveUser: id => user.toggleActiveUser({ id }),
   addUser: (email, password, address, dob, fullname, role, facultyId) =>
-    user.addUser({ email, password, address, dob, fullname, role, facultyId })
+    user.addUser({ email, password, address, dob, fullname, role, facultyId }),
+  updateUser: (address, dob, fullname, role, facultyId, id) =>
+    user.updateUser({ address, dob, fullname, role, facultyId, id })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

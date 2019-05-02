@@ -146,6 +146,25 @@ class DetailUploadedArticle extends React.Component {
                   </Collapse>
                 </div>
               )}
+              <Button
+                type="primary"
+                icon="global"
+                loading={this.props.article.isBusy}
+                onClick={() =>
+                  Modal.confirm({
+                    title: "Do you want to publish this article?",
+                    content:
+                      "Warning: This action cannot be taken back, please consider before submitting",
+                    onOk: () => {
+                      this.props.publishArticle(
+                        this.props.article.selectedArticle.id
+                      );
+                    }
+                  })
+                }
+              >
+                Publish
+              </Button>
             </Card>
           </div>
           <div className="editor">
@@ -181,7 +200,8 @@ const mapState = state => ({
 
 const mapDispatch = ({ userProfile, article }) => ({
   logoutFirebase: () => userProfile.logoutFirebase(),
-  makeComment: (comment, eventId) => article.makeComment({ comment, eventId })
+  makeComment: (comment, eventId) => article.makeComment({ comment, eventId }),
+  publishArticle: id => article.publishArticle({ id })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

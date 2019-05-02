@@ -41,13 +41,17 @@ class UploadArticle extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isVisible: false
+      isVisible: false,
+      isUpdating: false,
+      currentStudent: {}
     };
   }
 
-  toggleAddStudent = () => {
+  toggleAddStudent = (currentStudent, isVisible, isUpdating) => {
     this.setState({
-      isVisible: !this.state.isVisible
+      isVisible,
+      currentStudent,
+      isUpdating
     });
   };
 
@@ -61,6 +65,24 @@ class UploadArticle extends React.Component {
         const address = this.props.form.getFieldValue("address");
         const fullname = this.props.form.getFieldValue("fullname");
         this.props.addStudent(email, password, address, dob, fullname);
+        this.props.form.resetFields();
+      }
+    });
+  };
+
+  updateStudent = e => {
+    e.preventDefault();
+    this.props.form.validateFields(async (error, _values) => {
+      if (!error) {
+        const dob = moment(this.props.form.getFieldValue("dob")).valueOf();
+        const address = this.props.form.getFieldValue("address");
+        const fullname = this.props.form.getFieldValue("fullname");
+        this.props.updateStudent(
+          address,
+          dob,
+          fullname,
+          this.state.currentStudent.id
+        );
         this.props.form.resetFields();
       }
     });
@@ -87,7 +109,7 @@ class UploadArticle extends React.Component {
             type="primary"
             icon="edit"
             className="button"
-            // onClick={(_event) => this.props.openAddUserModal({currentUser: record})}
+            onClick={() => this.toggleAddStudent(record, true, true)}
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
@@ -106,14 +128,11 @@ class UploadArticle extends React.Component {
   };
 
   renderDob = (text, record, index) => {
-    return (
-      <span>
-          {moment(record.dob).format("LL")}
-      </span>
-    );
+    return <span>{moment(record.dob).format("LL")}</span>;
   };
 
   render() {
+    console.log(this.state.currentStudent);
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const columns = [
       {
@@ -172,7 +191,10 @@ class UploadArticle extends React.Component {
           <Row>
             <Col span={24} className="button-flex">
               <div className="add">
-                <Button type="primary" onClick={this.toggleAddStudent}>
+                <Button
+                  type="primary"
+                  onClick={() => this.toggleAddStudent({}, true, false)}
+                >
                   <Icon type="plus" /> Add New Student
                 </Button>
               </div>
@@ -198,84 +220,91 @@ class UploadArticle extends React.Component {
             />
           </div>
           <Modal
-            title="Add Student"
+            title="Add/Update Student"
             visible={this.state.isVisible}
             confirmLoading={this.props.student.isBusy}
             okText="Save"
             cancelText="Cancel"
-            onOk={this.addStudent}
-            onCancel={this.toggleAddStudent}
+            onOk={this.state.isUpdating ? this.updateStudent : this.addStudent}
+            onCancel={() => this.toggleAddStudent({}, false, false)}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
             }}
           >
             <div className="input-user-info">
               <Form>
-                <Form.Item label="Email" hasFeedback>
-                  {getFieldDecorator("email", {
-                    rules: [
-                      {
-                        required: true,
-                        message: "Please fill the email before submitting"
-                      },
-                      {
-                        type: "email",
-                        message: "The input is not valid E-mail!"
-                      }
-                    ]
-                  })(
-                    <Input
-                      name="email"
-                      prefix={<Icon type="mail" />}
-                      placeholder="Email"
-                      // onChange={e => this.setState({ title: e.target.value })}
-                      // disabled={this.props.currentUser._id ? true : false}
-                    />
-                  )}
-                </Form.Item>
+                {!this.state.isUpdating && (
+                  <div>
+                    <Form.Item label="Email" hasFeedback>
+                      {getFieldDecorator("email", {
+                        initialValue: this.state.currentStudent.email,
+                        rules: [
+                          {
+                            required: true,
+                            message: "Please fill the email before submitting"
+                          },
+                          {
+                            type: "email",
+                            message: "The input is not valid E-mail!"
+                          }
+                        ]
+                      })(
+                        <Input
+                          name="email"
+                          prefix={<Icon type="mail" />}
+                          placeholder="Email"
+                          // onChange={e => this.setState({ title: e.target.value })}
+                          // disabled={this.props.currentUser._id ? true : false}
+                        />
+                      )}
+                    </Form.Item>
 
-                <Form.Item label="Password" hasFeedback>
-                  {getFieldDecorator("password", {
-                    rules: [
-                      {
-                        required: true,
-                        message: "Please fill the password before submitting"
-                      }
-                    ]
-                  })(
-                    <Input
-                      prefix={<Icon type="lock" />}
-                      name="password"
-                      type="password"
-                      placeholder="Password"
-                      // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
-                </Form.Item>
-                <Form.Item label="Confirm Password" hasFeedback>
-                  {getFieldDecorator("confirmPassword", {
-                    rules: [
-                      {
-                        required: true,
-                        message:
-                          "Please fill the confirm password before submitting"
-                      },
-                      {
-                        validator: this.compareToFirstPassword
-                      }
-                    ]
-                  })(
-                    <Input
-                      prefix={<Icon type="lock" />}
-                      name="confirmPassword"
-                      type="password"
-                      placeholder="Confirm Password"
-                      // onChange={e => this.setState({ description: e.target.value })}
-                    />
-                  )}
-                </Form.Item>
+                    <Form.Item label="Password" hasFeedback>
+                      {getFieldDecorator("password", {
+                        rules: [
+                          {
+                            required: true,
+                            message:
+                              "Please fill the password before submitting"
+                          }
+                        ]
+                      })(
+                        <Input
+                          prefix={<Icon type="lock" />}
+                          name="password"
+                          type="password"
+                          placeholder="Password"
+                          // onChange={e => this.setState({ description: e.target.value })}
+                        />
+                      )}
+                    </Form.Item>
+                    <Form.Item label="Confirm Password" hasFeedback>
+                      {getFieldDecorator("confirmPassword", {
+                        rules: [
+                          {
+                            required: true,
+                            message:
+                              "Please fill the confirm password before submitting"
+                          },
+                          {
+                            validator: this.compareToFirstPassword
+                          }
+                        ]
+                      })(
+                        <Input
+                          prefix={<Icon type="lock" />}
+                          name="confirmPassword"
+                          type="password"
+                          placeholder="Confirm Password"
+                          // onChange={e => this.setState({ description: e.target.value })}
+                        />
+                      )}
+                    </Form.Item>
+                  </div>
+                )}
                 <Form.Item label="Full name" hasFeedback>
                   {getFieldDecorator("fullname", {
+                    initialValue: this.state.currentStudent.fullname,
                     rules: [
                       {
                         required: true,
@@ -293,6 +322,7 @@ class UploadArticle extends React.Component {
                 </Form.Item>
                 <Form.Item label="Date of birth" hasFeedback>
                   {getFieldDecorator("dob", {
+                    initialValue: moment(this.state.currentStudent.dob),
                     rules: [
                       {
                         required: true,
@@ -312,6 +342,7 @@ class UploadArticle extends React.Component {
                 </Form.Item>
                 <Form.Item label="Address" hasFeedback>
                   {getFieldDecorator("address", {
+                    initialValue: this.state.currentStudent.address,
                     rules: [
                       {
                         required: true,
@@ -348,7 +379,9 @@ const mapDispatch = ({ userProfile, student }) => ({
   fetchStudents: () => student.fetchStudents(),
   toggleActiveStudent: id => student.toggleActiveStudent({ id }),
   addStudent: (email, password, address, dob, fullname) =>
-    student.addStudent({ email, password, address, dob, fullname })
+    student.addStudent({ email, password, address, dob, fullname }),
+  updateStudent: (address, dob, fullname, id) =>
+    student.updateStudent({ address, dob, fullname, id })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

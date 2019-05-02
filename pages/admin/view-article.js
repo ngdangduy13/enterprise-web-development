@@ -41,7 +41,8 @@ class UploadArticle extends React.Component {
     super(props);
     this.state = {
       isVisible: false,
-      fileList: []
+      fileList: [],
+      selectedRowKeys: ""
     };
   }
 
@@ -52,6 +53,10 @@ class UploadArticle extends React.Component {
     this.setState({
       isVisible: !this.state.isVisible
     });
+  };
+
+  downloadSelectedArticles = () => {
+    this.props.downloadArticle(this.state.selectedRowKeys);
   };
 
   actionButtons = (text, record, index) => {
@@ -144,12 +149,19 @@ class UploadArticle extends React.Component {
 
     const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-      },
-      getCheckboxProps: record => ({
-        disabled: record.name === 'Disabled User', // Column configuration not to be checked
-        name: record.name,
-      }),
+        this.setState({
+          selectedRowKeys
+        });
+        console.log(
+          `selectedRowKeys: ${selectedRowKeys}`,
+          "selectedRows: ",
+          selectedRows
+        );
+      }
+      // getCheckboxProps: record => ({
+      //   disabled: record.name === 'Disabled User', // Column configuration not to be checked
+      //   name: record.name,
+      // }),
     };
     return (
       <AdminLayout
@@ -175,11 +187,11 @@ class UploadArticle extends React.Component {
               <div className="refresh">
                 <Button
                   type="primary"
-                  onClick={this.props.fetchAllArticles}
+                  onClick={this.downloadSelectedArticles}
                   loading={this.props.article.isBusy}
                   icon="download"
                 >
-                  Download selected file
+                  Download selected articles
                 </Button>
               </div>
             </Col>

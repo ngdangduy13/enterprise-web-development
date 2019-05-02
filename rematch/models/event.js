@@ -73,10 +73,11 @@ const event = createModel({
           contributionsWithoutComment: 0,
           contributionsByFaculty: {},
           contributorsByFaculty: {}
-
         };
         const counterRef = firebase.firestore().collection("counter");
         await counterRef.doc(result.id).set(counterData);
+
+        this.fetchEvents();
 
         message.success("Add event successfully");
       } catch (er) {
@@ -101,6 +102,7 @@ const event = createModel({
         const eventRef = firebase.firestore().collection("events");
         await eventRef.doc(payload.id).set(data, { merge: true });
 
+        this.fetchEvent();
         message.success("Update event successfully");
       } catch (er) {
         console.log(er);

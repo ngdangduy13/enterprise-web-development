@@ -76,15 +76,12 @@ class UploadArticle extends React.Component {
   };
 
   closeUploadArticle = () => {
-    this.setState(
-      {
-        isVisible: false,
-        currentArticle: {},
-        isUpdating: false,
-        fileList: []
-      },
-      this.props.fetchArticles
-    );
+    this.setState({
+      isVisible: false,
+      currentArticle: {},
+      isUpdating: false,
+      fileList: []
+    });
   };
 
   uploadArticle = e => {
@@ -97,9 +94,7 @@ class UploadArticle extends React.Component {
         const eventIndex = _.findIndex(this.props.event.all, o => {
           return o.id == event;
         });
-        if (
-          moment().valueOf() > this.props.event.all[eventIndex].closureDate
-        ) {
+        if (moment().valueOf() > this.props.event.all[eventIndex].closureDate) {
           Modal.error({
             title: "Submmit Error",
             content: `This magazine was closed in ${
@@ -134,8 +129,7 @@ class UploadArticle extends React.Component {
         });
 
         if (
-          moment().valueOf() >
-          this.props.event.all[eventIndex].finalClosureDate
+          moment().valueOf() > this.props.event.all[eventIndex].finalClosureDate
         ) {
           Modal.error({
             title: "Update Error",
@@ -211,11 +205,7 @@ class UploadArticle extends React.Component {
   };
 
   renderUploadedDate = (text, record, index) => {
-    return (
-      <span>
-          {moment(record.timestamp).format("LL")}
-      </span>
-    );
+    return <span>{moment(record.timestamp).format("LL")}</span>;
   };
 
   render() {
@@ -348,6 +338,7 @@ class UploadArticle extends React.Component {
               columns={columns}
               dataSource={this.props.article.all}
               rowKey={record => record.id}
+              // scroll={{ x: 1000 }}
             />
           </div>
           <Modal

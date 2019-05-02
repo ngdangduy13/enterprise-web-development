@@ -59,8 +59,7 @@ class UploadArticle extends React.Component {
         isVisible: false,
         isUpdating: false,
         currentEvent: {}
-      },
-      this.props.fetchEvents
+      }
     );
   };
 

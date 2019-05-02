@@ -71,6 +71,35 @@ const student = createModel({
         const articleRef = firebase.firestore().collection("users");
         const resultRef = await articleRef.doc(result.user.uid).set(data);
 
+        this.fetchUsers();
+
+        message.success("Add user successfully");
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    },
+
+    async updateUser(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+        const data = {
+          address: payload.address,
+          dob: payload.dob,
+          fullname: payload.fullname,
+          role: payload.role,
+          facultyId: payload.facultyId === undefined ? "" : payload.facultyId,
+          timestamp: moment().valueOf()
+        };
+
+        const articleRef = firebase.firestore().collection("users");
+        const resultRef = await articleRef
+          .doc(payload.id)
+          .set(data, { merge: true });
+
+        this.fetchUsers();
         message.success("Add user successfully");
       } catch (er) {
         console.log(er);

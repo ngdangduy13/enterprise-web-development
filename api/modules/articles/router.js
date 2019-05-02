@@ -57,30 +57,33 @@ articlesRouter.post("/upload", (req, res, next) => {
 
 articlesRouter.get("/download/:id", async (req, res) => {
   try {
-    const articleId = req.params.id;
+    const articleIds = req.params.id.split(",");
+
+    console.log(articleIds);
 
     const zip = archiver("zip");
-    res.attachment(`${articleId}.zip`);
+    res.attachment(`material.zip`);
     zip.pipe(res);
 
-    const articleRef = await admin
-      .firestore()
-      .collection("articles")
-      .doc(articleId)
-      .get();
-    const article = articleRef.data();
+    for (const id of articleIds) {
+      const articleRef = await admin
+        .firestore()
+        .collection("articles")
+        .doc(id)
+        .get();
+      const article = articleRef.data();
+      _.each(article.pathsForDownload, async item => {
+        let pathFile = item.path;
+        const fileFolder = path.join(__dirname, `../../../${pathFile}`);
+        zip.append("", { name: `${article.title}/` });
 
-    _.each(article.pathsForDownload, async item => {
-      let pathFile = item.path;
-      const fileFolder = path.join(__dirname, `../../../${pathFile}`);
-
-      zip.file(fileFolder, {
-        name: item.name
+        zip.file(fileFolder, {
+          name: `${article.title}/${item.name}`
+        });
       });
-    });
+    }
 
     zip.finalize();
-
   } catch (error) {
     console.log(error);
     res.status(401).send(error);

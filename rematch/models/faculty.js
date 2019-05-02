@@ -60,6 +60,32 @@ const student = createModel({
 
         const eventRef = firebase.firestore().collection("faculties");
         const result = await eventRef.add(data);
+
+        this.fetchFaculties();
+        message.success("Add faculty successfully");
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    },
+    async updateFaculty(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+        const data = {
+          name: payload.name,
+          address: payload.address
+        };
+
+        console.log("payload", payload);
+
+        const eventRef = firebase.firestore().collection("faculties");
+        const result = await eventRef
+          .doc(payload.id)
+          .set(data, { merge: true });
+
+        this.fetchFaculties();
         message.success("Add faculty successfully");
       } catch (er) {
         console.log(er);

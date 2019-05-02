@@ -64,8 +64,7 @@ const student = createModel({
           role: "STUDENT",
           isActive: true,
           fullname: payload.fullname,
-          timestamp: moment().valueOf(),
-          contributedEvent: []
+          timestamp: moment().valueOf()
         };
 
         const result = await firebase
@@ -74,6 +73,30 @@ const student = createModel({
         const articleRef = firebase.firestore().collection("users");
         const resultRef = await articleRef.doc(result.user.uid).set(data);
 
+        message.success("Add student successfully");
+      } catch (er) {
+        console.log(er);
+        message.error(er.message);
+      } finally {
+        this.updateBusyState(false);
+      }
+    },
+    async updateStudent(payload, rootState) {
+      try {
+        this.updateBusyState(true);
+        const data = {
+          address: payload.address,
+          dob: payload.dob,
+          fullname: payload.fullname,
+          timestamp: moment().valueOf()
+        };
+
+        const articleRef = firebase.firestore().collection("users");
+        const resultRef = await articleRef
+          .doc(payload.id)
+          .set(data, { merge: true });
+
+        this.fetchStudents();
         message.success("Add student successfully");
       } catch (er) {
         console.log(er);

@@ -38,13 +38,17 @@ class UploadArticle extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isVisible: false
+      isVisible: false,
+      currentFaculty: {},
+      isUpdating: false
     };
   }
 
-  toggleAddUser = () => {
+  toggleAddFaculty = (currentFaculty, isVisible, isUpdating) => {
     this.setState({
-      isVisible: !this.state.isVisible
+      isVisible,
+      currentFaculty,
+      isUpdating
     });
   };
 
@@ -55,6 +59,18 @@ class UploadArticle extends React.Component {
         const name = this.props.form.getFieldValue("name");
         const address = this.props.form.getFieldValue("address");
         this.props.addFaculty(name, address);
+        this.props.form.resetFields();
+      }
+    });
+  };
+
+  updateFaculty = e => {
+    e.preventDefault();
+    this.props.form.validateFields(async (error, _values) => {
+      if (!error) {
+        const name = this.props.form.getFieldValue("name");
+        const address = this.props.form.getFieldValue("address");
+        this.props.updateFaculty(name, address, this.state.currentFaculty.id);
         this.props.form.resetFields();
       }
     });
@@ -72,7 +88,7 @@ class UploadArticle extends React.Component {
             type="primary"
             icon="edit"
             className="button"
-            // onClick={(_event) => this.props.openAddUserModal({currentUser: record})}
+            onClick={() => this.toggleAddFaculty(record, true, true)}
             style={{ marginRight: "12px" }}
           />
         </Tooltip>
@@ -116,6 +132,7 @@ class UploadArticle extends React.Component {
         width: "11%"
       }
     ];
+    console.log(this.state);
     return (
       <AdminLayout
         userEmail={this.props.userProfile.email}
@@ -128,7 +145,10 @@ class UploadArticle extends React.Component {
           <Row>
             <Col span={24} className="button-flex">
               <div className="add">
-                <Button type="primary" onClick={this.toggleAddUser}>
+                <Button
+                  type="primary"
+                  onClick={() => this.toggleAddFaculty({}, true, false)}
+                >
                   <Icon type="plus" /> Add New Faculty
                 </Button>
               </div>
@@ -154,13 +174,13 @@ class UploadArticle extends React.Component {
             />
           </div>
           <Modal
-            title="Add Faculty"
+            title="Add/Update Faculty"
             visible={this.state.isVisible}
             confirmLoading={this.props.faculty.isBusy}
             okText="Save"
             cancelText="Cancel"
-            onOk={this.addUser}
-            onCancel={this.toggleAddUser}
+            onOk={this.state.isUpdating ? this.updateFaculty : this.addUser}
+            onCancel={() => this.toggleAddFaculty({}, false, false)}
             okButtonProps={{
               disabled: this.hasErrors(getFieldsError())
             }}
@@ -169,6 +189,7 @@ class UploadArticle extends React.Component {
               <Form>
                 <Form.Item label="Name" hasFeedback>
                   {getFieldDecorator("name", {
+                    initialValue: this.state.currentFaculty.name,
                     rules: [
                       {
                         required: true,
@@ -188,6 +209,8 @@ class UploadArticle extends React.Component {
 
                 <Form.Item label="Address" hasFeedback>
                   {getFieldDecorator("address", {
+                    initialValue: this.state.currentFaculty.address,
+
                     rules: [
                       {
                         required: true,
@@ -224,7 +247,9 @@ const mapDispatch = ({ userProfile, faculty }) => ({
     userProfile.loginFirebase({ email, password }),
   logoutFirebase: () => userProfile.logoutFirebase(),
   fetchFaculties: () => faculty.fetchFaculties(),
-  addFaculty: (name, address) => faculty.addFaculty({ name, address })
+  addFaculty: (name, address) => faculty.addFaculty({ name, address }),
+  updateFaculty: (name, address, id) =>
+    faculty.updateFaculty({ name, address, id })
 });
 
 export default withRematch(initStore, mapState, mapDispatch)(

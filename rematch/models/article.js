@@ -193,6 +193,7 @@ const article = createModel({
         };
         counterRef.doc(payload.eventId).set(counterData, { merge: true });
 
+        this.fetchArticles();
         message.success("Upload successfully");
       } catch (er) {
         console.log(er);
@@ -449,6 +450,8 @@ const article = createModel({
           },
           { merge: true }
         );
+
+        this.fetchArticles();
 
         message.success("Update successfully");
       } catch (er) {
