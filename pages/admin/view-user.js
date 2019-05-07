@@ -28,6 +28,7 @@ class UploadArticle extends React.Component {
     const querySnapshot = await firebase
       .firestore()
       .collection("users")
+      .orderBy("timestamp", "desc")
       .get();
     const users = [];
     querySnapshot.forEach(doc => {
@@ -176,6 +177,13 @@ class UploadArticle extends React.Component {
     return <span>{moment(record.dob).format("LL")}</span>;
   };
 
+  renderFaculty = (text, record, index) => { 
+    const facultyName = this.props.faculty.all.filter(i => i.id === record.facultyId)
+    console.log(facultyName)
+    return <span>{facultyName.length === 0 ? '' : facultyName[0].name}</span>
+  }
+
+
   render() {
     const { getFieldDecorator, getFieldsError } = this.props.form;
     const role = this.props.form.getFieldValue("role")
@@ -206,7 +214,16 @@ class UploadArticle extends React.Component {
         title: "Full name",
         dataIndex: "fullname",
         key: "fullname",
-        width: "20%"
+        // width: "20%"
+        // sorter: true,
+      },
+      {
+        title: "Faculty",
+        dataIndex: "facultyId",
+        key: "facultyId",
+        // width: "20%",
+        render: this.renderFaculty
+
         // sorter: true,
       },
       {
